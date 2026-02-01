@@ -124,16 +124,15 @@ class MazeGenerator:
     def display(self) -> None:
         """Prints the maze to the console using ASCII characters."""
         # Print the very top boundary of the entire maze
-        output = "+" + "---+" * self.width + "\n"
-
+        output = "\u250f" + "\u2501\u2501\u2501+" * self.width + "\n"
         for y in range(self.height):
             # 1. First line per row: Vertical walls and paths
-            row_str = "|"
+            row_str = "\u2503"
             for x in range(self.width):
                 cell = self.get_cell(x, y)
                 # If the 'E' (East) wall is True, it's a solid wall '|'
                 # If it's False, it's an open passage ' '
-                wall = "|" if cell.walls["E"] else " "
+                wall = "\u2503" if cell.walls["E"] else " "
                 row_str += "   " + wall
             output += row_str + "\n"
 
@@ -143,13 +142,13 @@ class MazeGenerator:
                 cell = self.get_cell(x, y)
                 # If the 'S' (South) wall is True, it's a solid wall '---'
                 # If it's False, it's an open passage '   '
-                wall = "---" if cell.walls["S"] else "   "
+                wall = "\u2501\u2501\u2501" if cell.walls["S"] else "   "
                 row_str += wall + "+"
             output += row_str + "\n"
 
         print(output)
 
 
-maze = MazeGenerator(8, 4)
+maze = MazeGenerator(20, 20)
 maze.generate()
 maze.display()
