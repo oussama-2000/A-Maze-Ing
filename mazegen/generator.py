@@ -1,3 +1,6 @@
+import random
+
+
 directions = {
     'N': (0, -1),
     'S': (0, 1),
@@ -35,6 +38,15 @@ class MazeGenerator:
         # Initialize the 2D array of Cell objects immediately upon creation
         self.grid = self.create_grid()
 
+    # def visited_check(self):
+    #     visited = []
+    #     for y in range(self.height):
+    #         row = []
+    #         for x in range(self.width):
+    #             row.append(False)
+    #         visited.append(row)
+    #     return visited
+
     def create_grid(self) -> list:
         """
         Builds a 2D list (matrix) populated with fresh Cell objects.
@@ -44,7 +56,7 @@ class MazeGenerator:
         for y in range(self.height):
             row = []
             for x in range(self.width):
-                row.append(Cell()) # Create a unique Cell instance for every coordinate
+                row.append(Cell())  # Create a unique Cell instance for every coordinate
             grid.append(row)
         return grid
 
@@ -78,32 +90,66 @@ class MazeGenerator:
         if current and neighbor:
             # Knock down the wall on the current cell's side
             current.walls[direction] = False
-   
+
             # Identify the matching wall on the neighbor's side using the 'opposite' helper
             opp = opposite[direction]
             neighbor.walls[opp] = False
 
+    def generate(self, start_x=0, start_y=0):
+        stack = [(start_x, start_y)]
+        cell = self.get_cell(start_x, start_y)
+        if cell:
+            cell.visited = True
 
-# maze = MazeGenerator(4, 3)
+        while stack:
+            x, y = stack[-1]
+            unvisited_neighbors = []
+            for direction, (dx, dy) in directions.items():
+                nx = x + dx
+                ny = y + dy
+                if self.in_bounds(nx, ny):
+                    neighbor = self.get_cell(nx, ny)
+                    if neighbor.visited is False:
+                        unvisited_neighbors.append((direction, nx, ny))
+            if unvisited_neighbors:
+                val = random.choice(unvisited_neighbors)
+                choosen_dir, next_x, next_y = val
+                self.carve_passage(x, y, next_x, next_y, choosen_dir)
+                neighbor_cell = self.get_cell(next_x, next_y)
+                neighbor_cell.visited = True
+                stack.append((next_x, next_y))
+            else:
+                stack.pop()
 
-# x1, y1 = 0, 0
-# x2, y2 = 1, 0
-# direction = 'E'
+    def display(self) -> None:
+        """Prints the maze to the console using ASCII characters."""
+        # Print the very top boundary of the entire maze
+        output = "+" + "---+" * self.width + "\n"
 
-# cell_a = maze.get_cell(x1, y1)
-# cell_b = maze.get_cell(x2, y2)
-# grid = maze.grid
-# print("--- BEFORE CARVING ---")
-# print(f"Cell A (0,0) East Wall: {cell_a.walls['E']}")
-# print(f"Cell B (1,0) West Wall: {cell_b.walls['W']}")
+        for y in range(self.height):
+            # 1. First line per row: Vertical walls and paths
+            row_str = "|"
+            for x in range(self.width):
+                cell = self.get_cell(x, y)
+                # If the 'E' (East) wall is True, it's a solid wall '|'
+                # If it's False, it's an open passage ' '
+                wall = "|" if cell.walls["E"] else " "
+                row_str += "   " + wall
+            output += row_str + "\n"
 
-# # 4. Perform the carve
-# maze.carve_passage(x1, y1, x2, y2, direction)
+            # 2. Second line per row: Horizontal walls and corners
+            row_str = "+"
+            for x in range(self.width):
+                cell = self.get_cell(x, y)
+                # If the 'S' (South) wall is True, it's a solid wall '---'
+                # If it's False, it's an open passage '   '
+                wall = "---" if cell.walls["S"] else "   "
+                row_str += wall + "+"
+            output += row_str + "\n"
 
-# # 5. Check walls AFTER carving
-# print("\n--- AFTER CARVING ---")
-# print(f"Cell A (0,0) East Wall: {cell_a.walls['E']} (Should be False)")
-# print(f"Cell B (1,0) West Wall: {cell_b.walls['W']} (Should be False)")
+        print(output)
 
-# # 6. Verify other walls are still intact (Safety Check)
-# print(f"Cell A (0,0) North Wall: {cell_a.walls['N']} (Should still be True)")
+
+maze = MazeGenerator(8, 4)
+maze.generate()
+maze.display()
