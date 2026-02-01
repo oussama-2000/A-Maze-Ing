@@ -1,5 +1,6 @@
 import random
-
+import time
+import os
 
 directions = {
     'N': (0, -1),
@@ -37,15 +38,6 @@ class MazeGenerator:
         self.height = height
         # Initialize the 2D array of Cell objects immediately upon creation
         self.grid = self.create_grid()
-
-    # def visited_check(self):
-    #     visited = []
-    #     for y in range(self.height):
-    #         row = []
-    #         for x in range(self.width):
-    #             row.append(False)
-    #         visited.append(row)
-    #     return visited
 
     def create_grid(self) -> list:
         """
@@ -102,6 +94,9 @@ class MazeGenerator:
             cell.visited = True
 
         while stack:
+            os.system('cls' if os.name == 'nt' else 'clear')
+            self.display(current_pos=stack[-1])
+            time.sleep(0.001)
             x, y = stack[-1]
             unvisited_neighbors = []
             for direction, (dx, dy) in directions.items():
@@ -121,7 +116,7 @@ class MazeGenerator:
             else:
                 stack.pop()
 
-    def display(self) -> None:
+    def display(self, current_pos=None) -> None:
         """Prints the maze to the console using ASCII characters."""
         # Print the very top boundary of the entire maze
         output = "\u250f" + "\u2501\u2501\u2501+" * self.width + "\n"
@@ -132,8 +127,12 @@ class MazeGenerator:
                 cell = self.get_cell(x, y)
                 # If the 'E' (East) wall is True, it's a solid wall '|'
                 # If it's False, it's an open passage ' '
+                if current_pos and (x, y) == current_pos:
+                    body = " * "
+                else:
+                    body = "   "
                 wall = "\u2503" if cell.walls["E"] else " "
-                row_str += "   " + wall
+                row_str += body + wall
             output += row_str + "\n"
 
             # 2. Second line per row: Horizontal walls and corners
@@ -145,10 +144,42 @@ class MazeGenerator:
                 wall = "\u2501\u2501\u2501" if cell.walls["S"] else "   "
                 row_str += wall + "+"
             output += row_str + "\n"
-
         print(output)
 
+    def play(self):
+        px, py = 0, 0  # Starting position
+        goal_x, goal_y = self.width - 1, self.height - 1
 
-maze = MazeGenerator(20, 20)
+        while True:
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print("Use 'W,A,S,D' To Move | Reach The End of The Maze To Win !")
+            self.display(current_pos=(px, py))
+
+            if (px, py) == (goal_x, goal_y):
+                print("We Have A Winner !")
+                break
+
+            move = input("Move: ").lower()
+            current_cell = self.get_cell(px, py)
+
+            # Wall checks
+            if move == 'w' and not current_cell.walls['N']:
+                py -= 1
+            elif move == 's' and not current_cell.walls['S']:
+                py += 1
+            elif move == 'a' and not current_cell.walls['W']:
+                px -= 1
+            elif move == 'd' and not current_cell.walls['E']:
+                px += 1
+            else:
+                print("We Caught A Looser !")
+                print("Player x:", px, "Player y:", py)
+                return
+
+
+maze = MazeGenerator(6, 4)
 maze.generate()
-maze.display()
+print("Generation Complete! Starting game...")
+time.sleep(1)
+
+maze.play()
