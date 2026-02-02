@@ -20,8 +20,10 @@ class ConfigParser:
                     if '=' in line:
                         key, value = line.split('=', 1)
                         self.assign_value(key.strip().upper(), value.strip())
-            self.validate()
-            return self.config
+            if self.validate():
+                return self.config
+            else:
+                return
         except FileNotFoundError:
             print(f"Error: The File '{self.filepath}' Was Not Found !")
             raise
@@ -48,6 +50,9 @@ class ConfigParser:
     def validate(self):
         w, h = self.config["WIDTH"], self.config["HEIGHT"]
 
+        if w == h:
+            print(f"No Weight Equal Height !!!")
+            return
         if w <= 0 or h <= 0:
             raise ValueError("Width And Height Must Be Positive .")
         for label, (x, y) in [("ENTRY", self.config["ENTRY"]), ("EXIT", self.config["EXIT"])]:

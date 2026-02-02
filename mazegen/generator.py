@@ -157,21 +157,22 @@ class MazeGenerator:
 
 parser = ConfigParser("config.txt")
 config_data = parser.parse()
+if config_data:
 
-maze = MazeGenerator(config_data['WIDTH'], config_data['HEIGHT'])
-maze.generate(animate=config_data['ANIMATE'], entry=config_data['ENTRY'], exit=config_data['EXIT'])
+    maze = MazeGenerator(config_data['WIDTH'], config_data['HEIGHT'])
+    maze.generate(animate=config_data['ANIMATE'], entry=config_data['ENTRY'], exit=config_data['EXIT'])
 
-encoder = HexEncoder(maze.grid, config_data['WIDTH'], config_data['HEIGHT'], config_data['ENTRY'], config_data['EXIT'], "Kantssna F BFS Dial Oussama...")
-encoder_maze = encoder.encode()
-file_name = config_data["OUTPUT_FILE"]
-try:
-    with open(file_name, 'w') as file:
-        file.write(encoder_maze)
-    print(f"Successfully saved maze to {file_name}!")
-except Exception as e:
-    print(f"Failed to save maze: {e}")
+    encoder = HexEncoder(maze.grid, config_data['WIDTH'], config_data['HEIGHT'], config_data['ENTRY'], config_data['EXIT'], "Kantssna F BFS Dial Oussama...")
+    encoder_maze = encoder.encode()
+    file_name = config_data["OUTPUT_FILE"]
+    try:
+        with open(file_name, 'w') as file:
+            file.write(encoder_maze)
+        print(f"Successfully saved maze to {file_name}!")
+    except Exception as e:
+        print(f"Failed to save maze: {e}")
 
-print("Generation Complete! Press Enter to Start Playing..")
-input()
+    # print("Generation Complete! Press Enter to Start Playing..")
+    # input()
 
-maze.play(entry=config_data['ENTRY'], exit=config_data['EXIT'])
+    # maze.play(entry=config_data['ENTRY'], exit=config_data['EXIT'])
