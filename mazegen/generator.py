@@ -1,8 +1,9 @@
 import random
 import time
 import os
-# from encoders import HexEncoder
-# from config.parser import ConfigParser
+from encoders import HexEncoder
+from parser import ConfigParser
+from renderer import AsciiRenderer
 
 directions = {
     'N': (0, -1),
@@ -83,17 +84,18 @@ class MazeGenerator:
             opp = opposite[direction]
             neighbor.walls[opp] = False
 
-    def generate(self, start_x=0, start_y=0):
+    def generate(self, start_x=0, start_y=0, animate=False, entry=None, exit=None):
 
+            renderer = AsciiRenderer(self, entry=entry, exit=exit)
             stack = [(start_x, start_y)]
             cell = self.get_cell(start_x, start_y)
             if cell:
                 cell.visited = True
-
             while stack:
-                os.system('cls' if os.name == 'nt' else 'clear')
-                self.display(current_pos=stack[-1])
-                time.sleep(0.01)
+                if animate:
+                    os.system('cls' if os.name == 'nt' else 'clear')
+                    print(renderer.render(player_pos=stack[-1]))
+                    time.sleep(0.01)
 
                 x, y = stack[-1]
                 unvisited_neighbors = []
@@ -114,41 +116,22 @@ class MazeGenerator:
                 else:
                     stack.pop()
 
-    def display(self, current_pos=None) -> None:
-        """Prints the maze to the console using ASCII characters."""
+    def play(self, entry=None, exit=None):
 
-        output = "\u250f" + "\u2501\u2501\u2501+" * self.width + "\n"
-        for y in range(self.height):
-            row_str = "\u2503"
-            for x in range(self.width):
-                cell = self.get_cell(x, y)
-                if current_pos and (x, y) == current_pos:
-                    body = "███"
-                else:
-                    body = "   "
-                wall = "\u2503" if cell.walls["E"] else " "
-                row_str += body + wall
-            output += row_str + "\n"
+        renderer = AsciiRenderer(self, entry=entry, exit=exit)
+        px, py = entry if entry else (0, 0)
+        goal_x, goal_y = exit if exit else (self.width - 1, self.height - 1)
 
-            row_str = "+"
-            for x in range(self.width):
-                cell = self.get_cell(x, y)
-                wall = "\u2501\u2501\u2501" if cell.walls["S"] else "   "
-                row_str += wall + "+"
-            output += row_str + "\n"
-        print(output)
-
-    def play(self):
-        px, py = 0, 0  # Starting position
-        goal_x, goal_y = self.width - 1, self.height - 1  # Goal To Reach
-
+        visited_path = [(px, py)]
         while True:
             os.system('cls' if os.name == 'nt' else 'clear')
+            print("---- Maze Runner ----")
             print("Use 'W,A,S,D' To Move | Reach The End of The Maze To Win !")
-            self.display(current_pos=(px, py))
+            print("here\n")
+            print(renderer.render(player_pos=(px, py), visited_trail=visited_path))
 
             if (px, py) == (goal_x, goal_y):
-                print("We Have A Winner !")
+                print("\033[92m✨ We Have A Winner! ✨\033[0m")
                 break
 
             move = input("Move: ").lower()
@@ -164,29 +147,31 @@ class MazeGenerator:
             elif move == 'd' and not current_cell.walls['E']:
                 px += 1
             else:
-                print("You Hit A Wall !!!")
+                print("\033[91m💥 You hit a wall!\033[0m")
                 print("Player x:", px, "Player y:", py)
                 time.sleep(2)
+            visited_pos = (px, py)
+            if (px, py) not in visited_path:
+                visited_path.append(visited_pos)
 
 
-# parser = ConfigParser("config/config.txt")
-# config_data = parser.parse()
+parser = ConfigParser("config.txt")
+config_data = parser.parse()
 
-maze = MazeGenerator(10, 10)
-maze.generate()
+maze = MazeGenerator(config_data['WIDTH'], config_data['HEIGHT'])
+maze.generate(animate=config_data['ANIMATE'], entry=config_data['ENTRY'], exit=config_data['EXIT'])
 
-# encoder = HexEncoder(maze.grid, 10, 10, (0, 0), (-1, -1), "SWESS...[Waitting For The Amkhou's Part]")
-# encoder_maze = encoder.encode()
-# file_name = config_data["OUTPUT_FILE"]
-# try:
-#     with open(file_name, 'w') as file:
-#         file.write(encoder_maze)
-#     print(f"Successfully saved maze to {file_name}!")
-# except Exception as e:
-#     print(f"Failed to save maze: {e}")
+encoder = HexEncoder(maze.grid, config_data['WIDTH'], config_data['HEIGHT'], config_data['ENTRY'], config_data['EXIT'], "Kantssna F BFS Dial Oussama...")
+encoder_maze = encoder.encode()
+file_name = config_data["OUTPUT_FILE"]
+try:
+    with open(file_name, 'w') as file:
+        file.write(encoder_maze)
+    print(f"Successfully saved maze to {file_name}!")
+except Exception as e:
+    print(f"Failed to save maze: {e}")
 
-# maze.display()
-# print("Generation Complete! Starting game...")
-# time.sleep(2)
+print("Generation Complete! Press Enter to Start Playing..")
+input()
 
-# maze.play()
+maze.play(entry=config_data['ENTRY'], exit=config_data['EXIT'])
