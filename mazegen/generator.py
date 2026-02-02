@@ -1,6 +1,8 @@
 import random
 import time
 import os
+# from encoders import HexEncoder
+# from config.parser import ConfigParser
 
 directions = {
     'N': (0, -1),
@@ -167,10 +169,24 @@ class MazeGenerator:
                 time.sleep(2)
 
 
+# parser = ConfigParser("config/config.txt")
+# config_data = parser.parse()
+
 maze = MazeGenerator(10, 10)
 maze.generate()
-# maze.display()
-print("Generation Complete! Starting game...")
-time.sleep(2)
 
-maze.play()
+# encoder = HexEncoder(maze.grid, 10, 10, (0, 0), (-1, -1), "SWESS...[Waitting For The Amkhou's Part]")
+# encoder_maze = encoder.encode()
+# file_name = config_data["OUTPUT_FILE"]
+# try:
+#     with open(file_name, 'w') as file:
+#         file.write(encoder_maze)
+#     print(f"Successfully saved maze to {file_name}!")
+# except Exception as e:
+#     print(f"Failed to save maze: {e}")
+
+# maze.display()
+# print("Generation Complete! Starting game...")
+# time.sleep(2)
+
+# maze.play()

@@ -6,7 +6,7 @@ class ConfigParser:
             "HEIGHT": 0,
             "ENTRY": (0, 0),
             "EXIT": (0, 0),
-            "OUTPUT_FILE": "maze.txt",
+            "OUTPUT_FILE": "output_maze.txt",
             "PERFECT": True
         }
     
