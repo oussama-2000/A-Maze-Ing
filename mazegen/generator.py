@@ -19,15 +19,12 @@ opposite = {
 class Cell:
     """Represents a single square (node) in the maze grid."""
     def __init__(self) -> None:
-        # Dictionary tracking if a wall exists in each direction
-        # True means the wall is solid; False means it has been carved (pathway)
         self.walls = {
             "N": True,
             "E": True,
             "S": True,
             "W": True
         }
-        # Used by the generation algorithm to ensure we don't visit the same room twice
         self.visited = False
 
 
@@ -48,7 +45,7 @@ class MazeGenerator:
         for y in range(self.height):
             row = []
             for x in range(self.width):
-                row.append(Cell())  # Create a unique Cell instance for every coordinate
+                row.append(Cell())
             grid.append(row)
         return grid
 
@@ -78,69 +75,62 @@ class MazeGenerator:
         current = self.get_cell(x1, y1)
         neighbor = self.get_cell(x2, y2)
 
-        # Only proceed if both coordinates actually point to valid cells
         if current and neighbor:
-            # Knock down the wall on the current cell's side
             current.walls[direction] = False
 
-            # Identify the matching wall on the neighbor's side using the 'opposite' helper
             opp = opposite[direction]
             neighbor.walls[opp] = False
 
     def generate(self, start_x=0, start_y=0):
-        stack = [(start_x, start_y)]
-        cell = self.get_cell(start_x, start_y)
-        if cell:
-            cell.visited = True
 
-        while stack:
-            os.system('cls' if os.name == 'nt' else 'clear')
-            self.display(current_pos=stack[-1])
-            time.sleep(0.001)
-            x, y = stack[-1]
-            unvisited_neighbors = []
-            for direction, (dx, dy) in directions.items():
-                nx = x + dx
-                ny = y + dy
-                if self.in_bounds(nx, ny):
-                    neighbor = self.get_cell(nx, ny)
-                    if neighbor.visited is False:
-                        unvisited_neighbors.append((direction, nx, ny))
-            if unvisited_neighbors:
-                val = random.choice(unvisited_neighbors)
-                choosen_dir, next_x, next_y = val
-                self.carve_passage(x, y, next_x, next_y, choosen_dir)
-                neighbor_cell = self.get_cell(next_x, next_y)
-                neighbor_cell.visited = True
-                stack.append((next_x, next_y))
-            else:
-                stack.pop()
+            stack = [(start_x, start_y)]
+            cell = self.get_cell(start_x, start_y)
+            if cell:
+                cell.visited = True
+
+            while stack:
+                os.system('cls' if os.name == 'nt' else 'clear')
+                self.display(current_pos=stack[-1])
+                time.sleep(0.01)
+
+                x, y = stack[-1]
+                unvisited_neighbors = []
+                for direction, (dx, dy) in directions.items():
+                    nx, ny = x + dx, y + dy
+                    if self.in_bounds(nx, ny):
+                        neighbor = self.get_cell(nx, ny)
+                        if neighbor and neighbor.visited is False:
+                            unvisited_neighbors.append((direction, nx, ny))
+                
+                if unvisited_neighbors:
+                    val = random.choice(unvisited_neighbors)
+                    chosen_dir, next_x, next_y = val
+                    self.carve_passage(x, y, next_x, next_y, chosen_dir)
+                    neighbor_cell = self.get_cell(next_x, next_y)
+                    neighbor_cell.visited = True
+                    stack.append((next_x, next_y))
+                else:
+                    stack.pop()
 
     def display(self, current_pos=None) -> None:
         """Prints the maze to the console using ASCII characters."""
-        # Print the very top boundary of the entire maze
+
         output = "\u250f" + "\u2501\u2501\u2501+" * self.width + "\n"
         for y in range(self.height):
-            # 1. First line per row: Vertical walls and paths
             row_str = "\u2503"
             for x in range(self.width):
                 cell = self.get_cell(x, y)
-                # If the 'E' (East) wall is True, it's a solid wall '|'
-                # If it's False, it's an open passage ' '
                 if current_pos and (x, y) == current_pos:
-                    body = " * "
+                    body = "███"
                 else:
                     body = "   "
                 wall = "\u2503" if cell.walls["E"] else " "
                 row_str += body + wall
             output += row_str + "\n"
 
-            # 2. Second line per row: Horizontal walls and corners
             row_str = "+"
             for x in range(self.width):
                 cell = self.get_cell(x, y)
-                # If the 'S' (South) wall is True, it's a solid wall '---'
-                # If it's False, it's an open passage '   '
                 wall = "\u2501\u2501\u2501" if cell.walls["S"] else "   "
                 row_str += wall + "+"
             output += row_str + "\n"
@@ -148,7 +138,7 @@ class MazeGenerator:
 
     def play(self):
         px, py = 0, 0  # Starting position
-        goal_x, goal_y = self.width - 1, self.height - 1
+        goal_x, goal_y = self.width - 1, self.height - 1  # Goal To Reach
 
         while True:
             os.system('cls' if os.name == 'nt' else 'clear')
@@ -172,14 +162,15 @@ class MazeGenerator:
             elif move == 'd' and not current_cell.walls['E']:
                 px += 1
             else:
-                print("We Caught A Looser !")
+                print("You Hit A Wall !!!")
                 print("Player x:", px, "Player y:", py)
-                return
+                time.sleep(2)
 
 
-maze = MazeGenerator(6, 4)
+maze = MazeGenerator(10, 10)
 maze.generate()
+# maze.display()
 print("Generation Complete! Starting game...")
-time.sleep(1)
+time.sleep(2)
 
 maze.play()
