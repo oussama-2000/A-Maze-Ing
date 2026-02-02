@@ -1,68 +1,42 @@
 import random
 import time
 import os
-
-directions = {
-    'N': (0, -1),
-    'S': (0, 1),
-    'E': (1, 0),
-    'W': (-1, 0),
-}
-opposite = {
-    'N': 'S',
-    'S': 'N',
-    'E': 'W',
-    'W': 'E',
-}
-
-
-class Cell:
-    """Represents a single square (node) in the maze grid."""
-    def __init__(self) -> None:
-        # Dictionary tracking if a wall exists in each direction
-        # True means the wall is solid; False means it has been carved (pathway)
-        self.walls = {
-            "N": True,
-            "E": True,
-            "S": True,
-            "W": True
-        }
-        # Used by the generation algorithm to ensure we don't visit the same room twice
-        self.visited = False
+import cell
+from coordinates import directions
+from coordinates import opposite
+from collections import deque
 
 
 class MazeGenerator:
-    """Handles the creation, logic, and state of the maze grid."""
-    def __init__(self, width: int, height: int) -> None:
+    def __init__(self, width: int,
+                 height: int,
+                 entry: tuple,
+                 exit: tuple) -> None:
         self.width = width
         self.height = height
-        # Initialize the 2D array of Cell objects immediately upon creation
+        self.entry = entry if entry else (0, 0)
+        self.exit = exit if exit else (width - 1, height - 1)
         self.grid = self.create_grid()
 
     def create_grid(self) -> list:
-        """
-        Builds a 2D list (matrix) populated with fresh Cell objects.
-        Returns: A list of lists representing the [y][x] coordinates.
-        """
+        """creates the maze grid (x, y)"""
         grid = []
         for y in range(self.height):
             row = []
             for x in range(self.width):
-                row.append(Cell())  # Create a unique Cell instance for every coordinate
+                row.append(cell.Cell())
             grid.append(row)
         return grid
 
     def in_bounds(self, x: int, y: int) -> bool:
         """
         Security check to ensure coordinates are within the grid boundaries.
-        Prevents 'Index Out of Range' errors when checking neighbors.
         """
         return 0 <= x < self.width and 0 <= y < self.height
 
     def get_cell(self, x: int, y: int):
         """
         Retrieves the Cell object at the given (x, y) coordinates.
-        Returns: The Cell object if valid, or None if the coordinates are out of bounds.
         """
         if not self.in_bounds(x, y):
             return None
@@ -70,10 +44,8 @@ class MazeGenerator:
 
     def carve_passage(self, x1, y1, x2, y2, direction) -> None:
         """
-        The 'Handshake' method: Removes the shared wall between two adjacent cells.
         x1, y1: Coordinates of the current cell.
         x2, y2: Coordinates of the neighbor cell.
-        direction: The compass direction ('N', 'S', 'E', or 'W') from current to neighbor.
         """
         current = self.get_cell(x1, y1)
         neighbor = self.get_cell(x2, y2)
@@ -96,7 +68,7 @@ class MazeGenerator:
         while stack:
             os.system('cls' if os.name == 'nt' else 'clear')
             self.display(current_pos=stack[-1])
-            time.sleep(0.001)
+            time.sleep(0.05)
             x, y = stack[-1]
             unvisited_neighbors = []
             for direction, (dx, dy) in directions.items():
@@ -117,33 +89,36 @@ class MazeGenerator:
                 stack.pop()
 
     def display(self, current_pos=None) -> None:
-        """Prints the maze to the console using ASCII characters."""
-        # Print the very top boundary of the entire maze
         output = "\u250f" + "\u2501\u2501\u2501+" * self.width + "\n"
+
         for y in range(self.height):
-            # 1. First line per row: Vertical walls and paths
+            # 1. Vertical walls + cell content
             row_str = "\u2503"
             for x in range(self.width):
                 cell = self.get_cell(x, y)
-                # If the 'E' (East) wall is True, it's a solid wall '|'
-                # If it's False, it's an open passage ' '
+
                 if current_pos and (x, y) == current_pos:
                     body = " * "
+                elif (x, y) == self.entry:
+                    body = " E "
+                elif (x, y) == self.exit:
+                    body = " X "
                 else:
                     body = "   "
+
                 wall = "\u2503" if cell.walls["E"] else " "
                 row_str += body + wall
+
             output += row_str + "\n"
 
-            # 2. Second line per row: Horizontal walls and corners
+            # 2. Horizontal walls
             row_str = "+"
             for x in range(self.width):
                 cell = self.get_cell(x, y)
-                # If the 'S' (South) wall is True, it's a solid wall '---'
-                # If it's False, it's an open passage '   '
                 wall = "\u2501\u2501\u2501" if cell.walls["S"] else "   "
                 row_str += wall + "+"
             output += row_str + "\n"
+
         print(output)
 
     def play(self):
@@ -176,10 +151,60 @@ class MazeGenerator:
                 print("Player x:", px, "Player y:", py)
                 return
 
+    def solve_bfs(self):
+        start = self.entry
+        goal = self.exit
 
-maze = MazeGenerator(6, 4)
+        queue = deque([start])
+        visited = set([start])
+        parent = {}
+        # {'reached cell(x, y)' : ('from which cell(x, y), 'wich direction') }
+
+        while queue:
+            x, y = queue.popleft()
+
+            if (x, y) == goal:
+                break
+
+            cell = self.get_cell(x, y)
+
+            # iterating directions to expand neighbors
+            for direction, (dx, dy) in directions.items():
+
+                if cell.walls[direction]:
+                    continue  # wall is closed
+
+                # compute neighbor coordinates
+                nx, ny = x + dx, y + dy
+
+                if not self.in_bounds(nx, ny):
+                    continue
+
+                if (nx, ny) not in visited:
+                    visited.add((nx, ny))
+                    parent[(nx, ny)] = (x, y, direction)
+                    queue.append((nx, ny))
+                    # add it to queue for next exploration
+
+        return self.generate_path(parent)
+
+    def generate_path(self, parent):
+        print(parent)
+        path = []
+        current = self.exit
+
+        while current != self.entry:
+            x, y, direction = parent[current]
+            path.append(direction)
+            current = (x, y)
+
+        path.reverse()
+        return path
+
+
+maze = MazeGenerator(6, 4, (0, 0), (5, 3))
 maze.generate()
-print("Generation Complete! Starting game...")
-time.sleep(1)
 
-maze.play()
+
+solution = maze.solve_bfs()
+print(solution)
