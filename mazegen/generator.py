@@ -59,12 +59,20 @@ class MazeGenerator:
             neighbor.walls[opp] = False
 
     def generate(self, start_x=0, start_y=0, animate=False, entry=None, exit=None):
+        if entry is None:
+            stack = [(start_x, start_y)]
+            cell = self.get_cell(start_x, start_y)
+            if cell:
+                cell.visited = True
+        else:
+            stack = [entry]
+        if exit is None:
+            exit = (self.width - 1, self.height - 1)
         renderer = AsciiRenderer(self, entry=entry, exit=exit)
-        stack = [(start_x, start_y)]
-        cell = self.get_cell(start_x, start_y)
 
-        if cell:
-            cell.visited = True
+        if animate:
+            print(renderer.render())
+            time.sleep(2)
         while stack:
             if animate:
                 os.system('cls' if os.name == 'nt' else 'clear')
@@ -82,6 +90,12 @@ class MazeGenerator:
                 val = random.choice(unvisited_neighbors)
                 chosen_dir, next_x, next_y = val
                 self.carve_passage(x, y, next_x, next_y, chosen_dir)
+
+                if animate:
+                    os.system('cls' if os.name == 'nt' else 'clear')
+                    print(renderer.render(player_pos=(next_x, next_y)))
+                    time.sleep(0.02)
+
                 neighbor_cell = self.get_cell(next_x, next_y)
                 neighbor_cell.visited = True
                 stack.append((next_x, next_y))
