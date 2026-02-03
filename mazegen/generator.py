@@ -1,21 +1,20 @@
 import random
 import time
 import os
-import cell
+from cell import Cell
 from coordinates import directions
 from coordinates import opposite
 from collections import deque
+from parser import ConfigParser
+from ascii_render import AsciiRenderer
+from encoder import HexEncoder
 
 
 class MazeGenerator:
     def __init__(self, width: int,
-                 height: int,
-                 entry: tuple,
-                 exit: tuple) -> None:
+                 height: int,) -> None:
         self.width = width
         self.height = height
-        self.entry = entry if entry else (0, 0)
-        self.exit = exit if exit else (width - 1, height - 1)
         self.grid = self.create_grid()
 
     def create_grid(self) -> list:
@@ -24,7 +23,7 @@ class MazeGenerator:
         for y in range(self.height):
             row = []
             for x in range(self.width):
-                row.append(cell.Cell())
+                row.append(Cell())
             grid.append(row)
         return grid
 
@@ -59,84 +58,69 @@ class MazeGenerator:
             opp = opposite[direction]
             neighbor.walls[opp] = False
 
-    def generate(self, start_x=0, start_y=0):
+    def generate(self, start_x=0, start_y=0, animate=False, entry=None, exit=None):
+        renderer = AsciiRenderer(self, entry=entry, exit=exit)
         stack = [(start_x, start_y)]
         cell = self.get_cell(start_x, start_y)
         if cell:
             cell.visited = True
-
         while stack:
-            os.system('cls' if os.name == 'nt' else 'clear')
-            self.display(current_pos=stack[-1])
-            time.sleep(0.05)
+            if animate:
+                os.system('cls' if os.name == 'nt' else 'clear')
+                print(renderer.render(player_pos=stack[-1]))
+                time.sleep(0.01)
+
             x, y = stack[-1]
             unvisited_neighbors = []
             for direction, (dx, dy) in directions.items():
-                nx = x + dx
-                ny = y + dy
+                nx, ny = x + dx, y + dy
                 if self.in_bounds(nx, ny):
                     neighbor = self.get_cell(nx, ny)
-                    if neighbor.visited is False:
+                    if neighbor and neighbor.visited is False:
                         unvisited_neighbors.append((direction, nx, ny))
             if unvisited_neighbors:
                 val = random.choice(unvisited_neighbors)
-                choosen_dir, next_x, next_y = val
-                self.carve_passage(x, y, next_x, next_y, choosen_dir)
+                chosen_dir, next_x, next_y = val
+                self.carve_passage(x, y, next_x, next_y, chosen_dir)
                 neighbor_cell = self.get_cell(next_x, next_y)
                 neighbor_cell.visited = True
                 stack.append((next_x, next_y))
             else:
                 stack.pop()
+    def place_bonuses(self, count=3, entry=(0, 0), exit=(0, 0)):
+        self.bonuses = []
+        while len(self.bonuses) < count:
+            rx, ry = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
+            if (rx, ry) != entry and (rx, ry) != exit and (rx, ry) not in self.bonuses:
+                self.bonuses.append((rx, ry))
+    def play(self, entry=None, exit=None):
 
-    def display(self, current_pos=None) -> None:
-        output = "\u250f" + "\u2501\u2501\u2501+" * self.width + "\n"
+        renderer = AsciiRenderer(self, entry=entry, exit=exit)
+        px, py = entry if entry else (0, 0)
+        goal_x, goal_y = exit if exit else (self.width - 1, self.height - 1)
 
-        for y in range(self.height):
-            # 1. Vertical walls + cell content
-            row_str = "\u2503"
-            for x in range(self.width):
-                cell = self.get_cell(x, y)
+        self.place_bonuses(count=5, entry=(px, py), exit=(goal_x, goal_y))
 
-                if current_pos and (x, y) == current_pos:
-                    body = " * "
-                elif (x, y) == self.entry:
-                    body = " E "
-                elif (x, y) == self.exit:
-                    body = " X "
-                else:
-                    body = "   "
-
-                wall = "\u2503" if cell.walls["E"] else " "
-                row_str += body + wall
-
-            output += row_str + "\n"
-
-            # 2. Horizontal walls
-            row_str = "+"
-            for x in range(self.width):
-                cell = self.get_cell(x, y)
-                wall = "\u2501\u2501\u2501" if cell.walls["S"] else "   "
-                row_str += wall + "+"
-            output += row_str + "\n"
-
-        print(output)
-
-    def play(self):
-        px, py = 0, 0  # Starting position
-        goal_x, goal_y = self.width - 1, self.height - 1
-
+        visited_path = [(px, py)]
+        steps = 0
+        hearts = ["\u2665", "\u2665", "\u2665"]
         while True:
+            val = "\U0001fb78\U0001fb78\U0001fb78\U0001fb78"
             os.system('cls' if os.name == 'nt' else 'clear')
+            print(f"{val} Maze Runner {val}")
+            print("Hearts:", hearts)
+            print(f"Steps: {steps} | Goal: {goal_x, goal_y}")
             print("Use 'W,A,S,D' To Move | Reach The End of The Maze To Win !")
-            self.display(current_pos=(px, py))
+            print(renderer.render(player_pos=(px, py), visited_trail=visited_path))
 
             if (px, py) == (goal_x, goal_y):
-                print("We Have A Winner !")
+                print("\033[92m✨ We Have A Winner! ✨\033[0m")
                 break
 
             move = input("Move: ").lower()
             current_cell = self.get_cell(px, py)
 
+            old_pos = (px, py)
             # Wall checks
             if move == 'w' and not current_cell.walls['N']:
                 py -= 1
@@ -147,13 +131,27 @@ class MazeGenerator:
             elif move == 'd' and not current_cell.walls['E']:
                 px += 1
             else:
-                print("We Caught A Looser !")
+                print("\033[91m💥 You hit a wall!\033[0m")
                 print("Player x:", px, "Player y:", py)
-                return
+                hearts.pop()
+                if not hearts:
+                    print("You Lose All Your Hearts")
+                    break
+                time.sleep(0.5)
+            new_pos = (px, py)
+            if new_pos in self.bonuses:
+                hearts.append("\u2665")
+                self.bonuses.remove(new_pos)
+                print("\033[92m +1 Heart Bonus! \033[0m")
+                time.sleep(1)
+            if new_pos != old_pos:
+                steps += 1
+                if new_pos not in visited_path:
+                    visited_path.append(new_pos)
 
-    def solve_bfs(self):
-        start = self.entry
-        goal = self.exit
+    def solve_bfs(self, entry, exit):
+        start = entry
+        goal = exit
 
         queue = deque([start])
         visited = set([start])
@@ -186,14 +184,13 @@ class MazeGenerator:
                     queue.append((nx, ny))
                     # add it to queue for next exploration
 
-        return self.generate_path(parent)
+        return self.generate_path(parent, entry, exit)
 
-    def generate_path(self, parent):
-        print(parent)
+    def generate_path(self, parent, entry, exit):
         path = []
-        current = self.exit
+        current = exit
 
-        while current != self.entry:
+        while current != entry:
             x, y, direction = parent[current]
             path.append(direction)
             current = (x, y)
@@ -201,10 +198,76 @@ class MazeGenerator:
         path.reverse()
         return path
 
+    def show_path(self, entry, exit, path) -> None:
+        render = AsciiRenderer(self, entry, exit)
+        for row in self.grid:
+            for _ in row:
+                os.system('cls' if os.name == 'nt' else 'clear')
+                print(render.render(path=path))
+            print()
 
-maze = MazeGenerator(6, 4, (0, 0), (5, 3))
-maze.generate()
+    def path_to_cells(self, entry, path):
+        x, y = entry
+        cell_pos = [(x, y)]
+
+        for direction in path:
+            dx, dy = directions[direction]
+            x += dx
+            y += dy
+            cell_pos.append((x, y))
+        return cell_pos
 
 
-solution = maze.solve_bfs()
-print(solution)
+configration = ConfigParser("../config/config.txt")
+data = configration.parse()
+if data:
+    width = data['WIDTH']
+    height = data['HEIGHT']
+    entry = data['ENTRY']
+    exit = data['EXIT']
+    perfect = data['PERFECT']
+    animate = data['ANIMATE']
+    output_file = data['OUTPUT_FILE']
+
+    maze = MazeGenerator(width, height)
+    maze.generate(animate=animate, entry=entry, exit=exit)
+
+    directions_path = maze.solve_bfs(entry, exit)
+
+    out_path = ""
+    for i in directions_path:
+        out_path += i
+
+    encoder = HexEncoder(maze.grid, width=width, height=height, entry=entry, exit=exit, path=out_path)
+    output = encoder.encode()
+    with open(output_file, "w") as file:
+        file.write(output)
+
+    print("="*10, "A-Maze-Ing", "="*10)
+    options = {
+        1: 're-generate a new maze',
+        2: 'show/hide path from entry to exti',
+        3: 'rotate maze colors',
+        4: 'player mode',
+        5: 'quit',
+    }
+
+    for key, option in options.items():
+        print(f'{key}. {option}')
+    try:
+        choice = int(input("Chice?:"))
+    except ValueError:
+        print("invalid option")
+    if choice not in options.keys():
+        print("invalid option")
+    elif choice == 1:
+        maze = MazeGenerator(width, height)
+        maze.generate(animate=animate, entry=entry, exit=exit)
+    elif choice == 2:
+        directions_path = maze.solve_bfs(entry, exit)
+        coordinates_path = maze.path_to_cells(entry, directions_path)
+        maze.show_path(entry=entry, exit=exit, path=coordinates_path)
+    elif choice == 3:
+        pass
+    elif choice == 4:
+        maze.play(entry=entry, exit=exit)
