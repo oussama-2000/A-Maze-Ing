@@ -38,6 +38,14 @@ class MazeGenerator:
         self.height = height
         # Initialize the 2D array of Cell objects immediately upon creation
         self.grid = self.create_grid()
+        self.bonuses = []
+
+    def place_bonuses(self, count=3, entry=(0, 0), exit=(0, 0)):
+        self.bonuses = []
+        while len(self.bonuses) < count:
+            rx, ry = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
+            if (rx, ry) != entry and (rx, ry) != exit and (rx, ry) not in self.bonuses:
+                self.bonuses.append((rx, ry))
 
     def create_grid(self) -> list:
         """
@@ -86,35 +94,39 @@ class MazeGenerator:
 
     def generate(self, start_x=0, start_y=0, animate=False, entry=None, exit=None):
 
-            renderer = AsciiRenderer(self, entry=entry, exit=exit)
+        if entry is None:
             stack = [(start_x, start_y)]
             cell = self.get_cell(start_x, start_y)
             if cell:
                 cell.visited = True
-            while stack:
-                if animate:
-                    os.system('cls' if os.name == 'nt' else 'clear')
-                    print(renderer.render(player_pos=stack[-1]))
-                    time.sleep(0.01)
+        else:
+            stack = [entry]
+        if exit is None:
+            exit = (self.width - 1, self.height - 1)
+        renderer = AsciiRenderer(self, entry=entry, exit=exit)
+        while stack:
+            if animate:
+                os.system('cls' if os.name == 'nt' else 'clear')
+                print(renderer.render(player_pos=stack[-1]))
+                time.sleep(0.01)
+            x, y = stack[-1]
+            unvisited_neighbors = []
+            for direction, (dx, dy) in directions.items():
+                nx, ny = x + dx, y + dy
+                if self.in_bounds(nx, ny):
+                    neighbor = self.get_cell(nx, ny)
+                    if neighbor and neighbor.visited is False:
+                        unvisited_neighbors.append((direction, nx, ny))
 
-                x, y = stack[-1]
-                unvisited_neighbors = []
-                for direction, (dx, dy) in directions.items():
-                    nx, ny = x + dx, y + dy
-                    if self.in_bounds(nx, ny):
-                        neighbor = self.get_cell(nx, ny)
-                        if neighbor and neighbor.visited is False:
-                            unvisited_neighbors.append((direction, nx, ny))
-                
-                if unvisited_neighbors:
-                    val = random.choice(unvisited_neighbors)
-                    chosen_dir, next_x, next_y = val
-                    self.carve_passage(x, y, next_x, next_y, chosen_dir)
-                    neighbor_cell = self.get_cell(next_x, next_y)
-                    neighbor_cell.visited = True
-                    stack.append((next_x, next_y))
-                else:
-                    stack.pop()
+            if unvisited_neighbors:
+                val = random.choice(unvisited_neighbors)
+                chosen_dir, next_x, next_y = val
+                self.carve_passage(x, y, next_x, next_y, chosen_dir)
+                neighbor_cell = self.get_cell(next_x, next_y)
+                neighbor_cell.visited = True
+                stack.append((next_x, next_y))
+            else:
+                stack.pop()
 
     def play(self, entry=None, exit=None):
 
@@ -122,12 +134,18 @@ class MazeGenerator:
         px, py = entry if entry else (0, 0)
         goal_x, goal_y = exit if exit else (self.width - 1, self.height - 1)
 
+        self.place_bonuses(count=5, entry=(px, py), exit=(goal_x, goal_y))
+
         visited_path = [(px, py)]
+        steps = 0
+        hearts = ["\u2665", "\u2665", "\u2665"]
         while True:
+            val = "\U0001fb78\U0001fb78\U0001fb78\U0001fb78"
             os.system('cls' if os.name == 'nt' else 'clear')
-            print("---- Maze Runner ----")
+            print(f"{val} Maze Runner {val}")
+            print("Hearts:", hearts)
+            print(f"Steps: {steps} | Goal: {goal_x, goal_y}")
             print("Use 'W,A,S,D' To Move | Reach The End of The Maze To Win !")
-            print("here\n")
             print(renderer.render(player_pos=(px, py), visited_trail=visited_path))
 
             if (px, py) == (goal_x, goal_y):
@@ -137,6 +155,7 @@ class MazeGenerator:
             move = input("Move: ").lower()
             current_cell = self.get_cell(px, py)
 
+            old_pos = (px, py)
             # Wall checks
             if move == 'w' and not current_cell.walls['N']:
                 py -= 1
@@ -149,16 +168,26 @@ class MazeGenerator:
             else:
                 print("\033[91m💥 You hit a wall!\033[0m")
                 print("Player x:", px, "Player y:", py)
-                time.sleep(2)
-            visited_pos = (px, py)
-            if (px, py) not in visited_path:
-                visited_path.append(visited_pos)
+                hearts.pop()
+                if not hearts:
+                    print("You Lose All Your Hearts")
+                    break
+                time.sleep(0.5)
+            new_pos = (px, py)
+            if new_pos in self.bonuses:
+                hearts.append("\u2665")
+                self.bonuses.remove(new_pos)
+                print("\033[92m +1 Heart Bonus! \033[0m")
+                time.sleep(1)
+            if new_pos != old_pos:
+                steps += 1
+                if new_pos not in visited_path:
+                    visited_path.append(new_pos)
 
 
-parser = ConfigParser("config.txt")
+parser = ConfigParser("../config/config.txt")
 config_data = parser.parse()
 if config_data:
-
     maze = MazeGenerator(config_data['WIDTH'], config_data['HEIGHT'])
     maze.generate(animate=config_data['ANIMATE'], entry=config_data['ENTRY'], exit=config_data['EXIT'])
 
@@ -172,7 +201,9 @@ if config_data:
     except Exception as e:
         print(f"Failed to save maze: {e}")
 
-    # print("Generation Complete! Press Enter to Start Playing..")
-    # input()
+    print("Generation Complete! Press Enter to Start Playing..")
+    input()
 
-    # maze.play(entry=config_data['ENTRY'], exit=config_data['EXIT'])
+    maze.play(entry=config_data['ENTRY'], exit=config_data['EXIT'])
+else:
+    print("Error")
