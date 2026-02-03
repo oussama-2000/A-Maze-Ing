@@ -62,6 +62,7 @@ class MazeGenerator:
         renderer = AsciiRenderer(self, entry=entry, exit=exit)
         stack = [(start_x, start_y)]
         cell = self.get_cell(start_x, start_y)
+
         if cell:
             cell.visited = True
         while stack:
@@ -69,7 +70,6 @@ class MazeGenerator:
                 os.system('cls' if os.name == 'nt' else 'clear')
                 print(renderer.render(player_pos=stack[-1]))
                 time.sleep(0.01)
-
             x, y = stack[-1]
             unvisited_neighbors = []
             for direction, (dx, dy) in directions.items():
@@ -87,6 +87,10 @@ class MazeGenerator:
                 stack.append((next_x, next_y))
             else:
                 stack.pop()
+        if not animate:
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print(renderer.render())
+
     def place_bonuses(self, count=3, entry=(0, 0), exit=(0, 0)):
         self.bonuses = []
         while len(self.bonuses) < count:
@@ -204,7 +208,7 @@ class MazeGenerator:
             for _ in row:
                 os.system('cls' if os.name == 'nt' else 'clear')
                 print(render.render(path=path))
-            print()
+                time.sleep(0.009)
 
     def path_to_cells(self, entry, path):
         x, y = entry
