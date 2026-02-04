@@ -58,7 +58,7 @@ class MazeGenerator:
             opp = opposite[direction]
             neighbor.walls[opp] = False
 
-    def generate(self, start_x=0, start_y=0, animate=False, entry=None, exit=None):
+    def generate(self, start_x=0, start_y=0, animate=False, entry=None, exit=None, rotate_theme=False):
         if entry is None:
             stack = [(start_x, start_y)]
             cell = self.get_cell(start_x, start_y)
@@ -123,6 +123,7 @@ class MazeGenerator:
         visited_path = [(px, py)]
         steps = 0
         hearts = ["\u2665", "\u2665", "\u2665"]
+        
         while True:
             val = "\U0001fb78\U0001fb78\U0001fb78\U0001fb78"
             os.system('cls' if os.name == 'nt' else 'clear')
@@ -131,7 +132,8 @@ class MazeGenerator:
             print(f"Steps: {steps} | Goal: {goal_x, goal_y}")
             print("Use 'W,A,S,D' To Move | Reach The End of The Maze To Win !")
             print("for exit the play mode enter : exit")
-            print(renderer.render(player_pos=(px, py), visited_trail=visited_path))
+            theme = random.randint(0, 3)
+            print(renderer.render(player_pos=(px, py), visited_trail=visited_path, rotate_theme=True, theme=theme))
 
             if (px, py) == (goal_x, goal_y):
                 print("\033[92m We Have A Winner! \033[0m")
@@ -220,7 +222,7 @@ class MazeGenerator:
         path.reverse()
         return path
 
-    def show_path(self, entry, exit, path, animate=True) -> None:
+    def show_path(self, entry, exit, path, animate=True, show=True) -> None:
         renderer = AsciiRenderer(self, entry, exit)
 
         if animate:
@@ -228,14 +230,12 @@ class MazeGenerator:
 
             for cell in path:
                 visible_path.add(cell)
-
                 os.system('cls' if os.name == 'nt' else 'clear')
-                print(renderer.render(path=visible_path))
+                print(renderer.render(path=visible_path, show=show))
                 time.sleep(0.05)
-
         else:
             os.system('cls' if os.name == 'nt' else 'clear')
-            print(renderer.render(path=set(path)))
+            print(renderer.render(path=set(path), show=show))
 
 
     def path_to_cells(self, entry, path):
@@ -248,6 +248,7 @@ class MazeGenerator:
             y += dy
             cell_pos.append((x, y))
         return cell_pos
+
 
 
 configration = ConfigParser("../config/config.txt")
@@ -266,7 +267,8 @@ if data:
     maze.generate(animate=animate, entry=entry, exit=exit)
 
     
-
+    theme = 0
+    show = True
     while True:
 
         directions_path = maze.solve_bfs(entry, exit)
@@ -280,11 +282,13 @@ if data:
         with open(output_file, "w") as file:
                     file.write(output)
 
-        
+        directions_path = maze.solve_bfs(entry, exit)
+        coordinates_path = maze.path_to_cells(entry, directions_path)
+
         print("="*10, "A-Maze-Ing", "="*10)
         options = {
             1: 're-generate a new maze',
-            2: 'show/hide path from entry to exti',
+            2: 'show/hide path from entry to exit',
             3: 'rotate maze colors',
             4: 'player mode',
             5: 'quit',
@@ -293,7 +297,7 @@ if data:
         for key, option in options.items():
             print(f'{key}. {option}')
         try:
-            choice = int(input("Chice?:"))
+            choice = int(input("Choice: "))
         except ValueError:
             print("invalid option")
         if choice not in options.keys():
@@ -303,11 +307,22 @@ if data:
             maze = MazeGenerator(width, height)
             maze.generate(animate=animate, entry=entry, exit=exit)
         elif choice == 2:
-            directions_path = maze.solve_bfs(entry, exit)
-            coordinates_path = maze.path_to_cells(entry, directions_path)
-            maze.show_path(entry=entry, exit=exit, path=coordinates_path, animate=animate)
+
+            if show:
+                maze.show_path(entry=entry, exit=exit, path=coordinates_path, animate=animate)
+                show = False
+            elif not show:
+                maze.show_path(entry=entry, exit=exit, path=coordinates_path, animate=animate, show=show)
+                show = True
         elif choice == 3:
-            pass
+
+            os.system('cls' if os.name == 'nt' else 'clear')
+            renderer = AsciiRenderer(maze=maze, entry=entry, exit=exit)
+            print(renderer.render(rotate_theme=True, theme=theme))
+            theme += 1
+            if theme > 3:
+                theme = 0
+
         elif choice == 4:
             maze.play(entry=entry, exit=exit)
         elif choice == 5:
