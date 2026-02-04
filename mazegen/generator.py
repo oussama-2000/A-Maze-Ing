@@ -273,7 +273,7 @@ if data:
     for key, option in options.items():
         print(f'{key}. {option}')
     try:
-        choice = int(input("Chice?:"))
+        choice = int(input("Choice: "))
     except ValueError:
         print("invalid option")
     if choice not in options.keys():
@@ -289,3 +289,6 @@ if data:
         pass
     elif choice == 4:
         maze.play(entry=entry, exit=exit)
+    elif choice == 5:
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print("Exiting The Game !")
