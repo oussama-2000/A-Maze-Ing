@@ -111,6 +111,7 @@ class MazeGenerator:
             rx, ry = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
             if (rx, ry) != entry and (rx, ry) != exit and (rx, ry) not in self.bonuses:
                 self.bonuses.append((rx, ry))
+
     def play(self, entry=None, exit=None):
 
         renderer = AsciiRenderer(self, entry=entry, exit=exit)
@@ -129,10 +130,11 @@ class MazeGenerator:
             print("Hearts:", hearts)
             print(f"Steps: {steps} | Goal: {goal_x, goal_y}")
             print("Use 'W,A,S,D' To Move | Reach The End of The Maze To Win !")
+            print("for exit the play mode enter : exit")
             print(renderer.render(player_pos=(px, py), visited_trail=visited_path))
 
             if (px, py) == (goal_x, goal_y):
-                print("\033[92m✨ We Have A Winner! ✨\033[0m")
+                print("\033[92m We Have A Winner! \033[0m")
                 break
 
             move = input("Move: ").lower()
@@ -148,8 +150,10 @@ class MazeGenerator:
                 px -= 1
             elif move == 'd' and not current_cell.walls['E']:
                 px += 1
+            elif move == 'exit':
+                break
             else:
-                print("\033[91m💥 You hit a wall!\033[0m")
+                print("\033[91m You hit a wall!\033[0m")
                 print("Player x:", px, "Player y:", py)
                 hearts.pop()
                 if not hearts:
@@ -216,13 +220,23 @@ class MazeGenerator:
         path.reverse()
         return path
 
-    def show_path(self, entry, exit, path) -> None:
-        render = AsciiRenderer(self, entry, exit)
-        for row in self.grid:
-            for _ in row:
+    def show_path(self, entry, exit, path, animate=True) -> None:
+        renderer = AsciiRenderer(self, entry, exit)
+
+        if animate:
+            visible_path = set()
+
+            for cell in path:
+                visible_path.add(cell)
+
                 os.system('cls' if os.name == 'nt' else 'clear')
-                print(render.render(path=path))
-                time.sleep(0.009)
+                print(renderer.render(path=visible_path))
+                time.sleep(0.05)
+
+        else:
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print(renderer.render(path=set(path)))
+
 
     def path_to_cells(self, entry, path):
         x, y = entry
@@ -238,6 +252,7 @@ class MazeGenerator:
 
 configration = ConfigParser("../config/config.txt")
 data = configration.parse()
+
 if data:
     width = data['WIDTH']
     height = data['HEIGHT']
@@ -250,42 +265,51 @@ if data:
     maze = MazeGenerator(width, height)
     maze.generate(animate=animate, entry=entry, exit=exit)
 
-    directions_path = maze.solve_bfs(entry, exit)
+    
 
-    out_path = ""
-    for i in directions_path:
-        out_path += i
+    while True:
 
-    encoder = HexEncoder(maze.grid, width=width, height=height, entry=entry, exit=exit, path=out_path)
-    output = encoder.encode()
-    with open(output_file, "w") as file:
-        file.write(output)
-
-    print("="*10, "A-Maze-Ing", "="*10)
-    options = {
-        1: 're-generate a new maze',
-        2: 'show/hide path from entry to exti',
-        3: 'rotate maze colors',
-        4: 'player mode',
-        5: 'quit',
-    }
-
-    for key, option in options.items():
-        print(f'{key}. {option}')
-    try:
-        choice = int(input("Chice?:"))
-    except ValueError:
-        print("invalid option")
-    if choice not in options.keys():
-        print("invalid option")
-    elif choice == 1:
-        maze = MazeGenerator(width, height)
-        maze.generate(animate=animate, entry=entry, exit=exit)
-    elif choice == 2:
         directions_path = maze.solve_bfs(entry, exit)
-        coordinates_path = maze.path_to_cells(entry, directions_path)
-        maze.show_path(entry=entry, exit=exit, path=coordinates_path)
-    elif choice == 3:
-        pass
-    elif choice == 4:
-        maze.play(entry=entry, exit=exit)
+        out_path = ""
+        for i in directions_path:
+            out_path += i
+        
+        encoder = HexEncoder(maze.grid, width=width, height=height, entry=entry, exit=exit, path=out_path)
+        output = encoder.encode()
+
+        with open(output_file, "w") as file:
+                    file.write(output)
+
+        
+        print("="*10, "A-Maze-Ing", "="*10)
+        options = {
+            1: 're-generate a new maze',
+            2: 'show/hide path from entry to exti',
+            3: 'rotate maze colors',
+            4: 'player mode',
+            5: 'quit',
+        }
+
+        for key, option in options.items():
+            print(f'{key}. {option}')
+        try:
+            choice = int(input("Chice?:"))
+        except ValueError:
+            print("invalid option")
+        if choice not in options.keys():
+            print("invalid option")
+        elif choice == 1:
+            os.system('cls' if os.name == 'nt' else 'clear')
+            maze = MazeGenerator(width, height)
+            maze.generate(animate=animate, entry=entry, exit=exit)
+        elif choice == 2:
+            directions_path = maze.solve_bfs(entry, exit)
+            coordinates_path = maze.path_to_cells(entry, directions_path)
+            maze.show_path(entry=entry, exit=exit, path=coordinates_path, animate=animate)
+        elif choice == 3:
+            pass
+        elif choice == 4:
+            maze.play(entry=entry, exit=exit)
+        elif choice == 5:
+            break
+
