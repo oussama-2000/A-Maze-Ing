@@ -59,7 +59,7 @@ class MazeGenerator:
     def generate(self, start_x=0, start_y=0, animate=False, entry=None, exit=None, rotate_theme=False, perfect_flag=False):
         px, py = entry if entry else (start_x, start_y)
         stack = [(px, py)]
-        
+
         cell = self.get_cell(px, py)
         if cell:
             cell.visited = True

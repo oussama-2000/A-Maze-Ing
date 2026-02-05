@@ -96,10 +96,10 @@ class AsciiRenderer:
                 elif hasattr(self.maze, 'bonuses') and (x, y) in self.maze.bonuses:
                     body = f" \033[{origin_theme['bonuses']}m\U0001fbc4\033[0m "
                 elif visited_trail and (x, y) in visited_trail:
-                    body = f" \033[{origin_theme['visited_cells']}m\u25aa\033[0m "
+                    body = f" \033[{origin_theme['visited_cells']}m\u2588\033[0m "
                 elif path and (x, y) in path:
                     if show:
-                        body = f" \033[{origin_theme['path']}m\u25aa\033[0m "
+                        body = f" \033[{origin_theme['path']}m\u2588\033[0m "
                     else:
                         body = "   "
                 else:
