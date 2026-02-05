@@ -7,7 +7,9 @@ class ConfigParser:
             "ENTRY": (0, 0),
             "EXIT": (0, 0),
             "OUTPUT_FILE": "output_maze.txt",
-            "PERFECT": True
+            "PERFECT": False,
+            "ANIMATE": False,
+            "HALWASA": False
         }
 
     def parse(self) -> dict:
@@ -44,6 +46,8 @@ class ConfigParser:
                 self.config[key] = value
             elif key == "ANIMATE":
                 self.config[key] = value.lower() == 'true'
+            elif key == "HALWASA":
+                self.config[key] = value.lower() == 'true'
         except Exception:
             raise ValueError(f"Could Not Parse '{value} for key '{key}")
 
@@ -55,6 +59,9 @@ class ConfigParser:
             return
         if w <= 0 or h <= 0:
             raise ValueError("Width And Height Must Be Positive .")
+
+        if self.config["ENTRY"] == self.config["EXIT"]:
+            raise ValueError("Entry and Exit must be different")
         for label, (x, y) in [("ENTRY", self.config["ENTRY"]), ("EXIT", self.config["EXIT"])]:
             if (x < 0) or (x >= w) or (y < 0) or (y >= h):
                 raise ValueError(f"{label} {x},{y} is outside The {w}x{h} grid !")
