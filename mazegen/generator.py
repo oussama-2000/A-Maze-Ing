@@ -71,7 +71,7 @@ class MazeGenerator:
             if animate:
                 os.system('cls' if os.name == 'nt' else 'clear')
                 print(renderer.render(player_pos=stack[-1]))
-                time.sleep(0.000005)
+                time.sleep(0.1)
 
             x, y = stack[-1]
             unvisited_neighbors = []
@@ -111,25 +111,17 @@ class MazeGenerator:
                 if self.in_bounds(nx, ny):
                     self.carve_passage(rx, ry, nx, ny, random_dir)
 
-        # entry_cell = self.get_cell(px, py)
-        # if entry_cell:
-        #     if px == 0: entry_cell.walls['W'] = False # Open Left
-        #     elif py == 0: entry_cell.walls['N'] = False # Open Top
-
-        # exit_cell = self.get_cell(exit[0], exit[1])
-        # if exit_cell:
-        #     if exit[0] == self.width - 1: exit_cell.walls['E'] = False # Open Right
-        #     elif exit[1] == self.height - 1: exit_cell.walls['S'] = False # Open Bottom
-
         if not animate:
             os.system('cls' if os.name == 'nt' else 'clear')
             print(renderer.render())
 
-    def place_bonuses(self, count=3, entry=(0, 0), exit=(0, 0)):
+    def place_bonuses(self, count=3, entry=(0, 0), exit=(0, 0), special_cells=None):
+        if special_cells is None:
+            special_cells = []
         self.bonuses = []
         while len(self.bonuses) < count:
             rx, ry = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
-            if (rx, ry) != entry and (rx, ry) != exit and (rx, ry) not in self.bonuses:
+            if (rx, ry) != entry and (rx, ry) != exit and (rx, ry) not in self.bonuses and (rx, ry) not in special_cells:
                 self.bonuses.append((rx, ry))
 
     def play(self, entry=None, exit=None, halwasa=False):
