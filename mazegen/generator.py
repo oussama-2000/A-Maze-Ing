@@ -58,7 +58,7 @@ class MazeGenerator:
             opp = opposite[direction]
             neighbor.walls[opp] = False
 
-    def generate(self, start_x=0, start_y=0, animate=False, entry=None, exit=None, rotate_theme=False):
+    def generate(self, start_x=0, start_y=0, animate=False, entry=None, exit=None, rotate_theme=False, perfect_flag=False):
         if entry is None:
             stack = [(start_x, start_y)]
             cell = self.get_cell(start_x, start_y)
@@ -70,9 +70,9 @@ class MazeGenerator:
             exit = (self.width - 1, self.height - 1)
         renderer = AsciiRenderer(self, entry=entry, exit=exit)
 
-        if animate:
-            print(renderer.render())
-            time.sleep(2)
+        # if animate:
+        #     print(renderer.render())
+        #     time.sleep(2)
         while stack:
             if animate:
                 os.system('cls' if os.name == 'nt' else 'clear')
@@ -101,6 +101,17 @@ class MazeGenerator:
                 stack.append((next_x, next_y))
             else:
                 stack.pop()
+        if not perfect_flag:
+            extra_walls_to_break = int((self.width * self.height) / 10)
+            for _ in range(extra_walls_to_break):
+                rx, ry = random.randint(0, self.width-1), random.randint(0, self.height-1)
+                random_dir = random.choice(list(directions.keys()))
+                dx, dy = directions[random_dir]
+                nx, ny = rx + dx, ry + dy
+                
+                if self.in_bounds(nx, ny):
+                    self.carve_passage(rx, ry, nx, ny, random_dir)
+
         if not animate:
             os.system('cls' if os.name == 'nt' else 'clear')
             print(renderer.render())
@@ -153,6 +164,10 @@ class MazeGenerator:
                 px -= 1
             elif move == 'd' and not current_cell.walls['E']:
                 px += 1
+            elif move == "hplus":
+                print("\033[35m Cheat Code Activated +1 Heart \033[0m")
+                time.sleep(0.5)
+                hearts += ["\u2665"]
             elif move == 'exit':
                 break
             else:
@@ -162,7 +177,7 @@ class MazeGenerator:
                 if not hearts:
                     print("You Lose All Your Hearts")
                     break
-                time.sleep(0.5)
+                time.sleep(0.3)
             new_pos = (px, py)
             if new_pos in self.bonuses:
                 hearts.append("\u2665")
@@ -265,9 +280,8 @@ if data:
     output_file = data['OUTPUT_FILE']
 
     maze = MazeGenerator(width, height)
-    maze.generate(animate=animate, entry=entry, exit=exit)
+    maze.generate(animate=animate, entry=entry, exit=exit, perfect_flag=perfect)
 
-    
     theme = 0
     show = True
     flag = True
@@ -309,7 +323,7 @@ if data:
                 show = True
             os.system('cls' if os.name == 'nt' else 'clear')
             maze = MazeGenerator(width, height)
-            maze.generate(animate=animate, entry=entry, exit=exit)
+            maze.generate(animate=animate, entry=entry, exit=exit, perfect_flag=perfect)
         elif choice == 2:
 
             if show:
