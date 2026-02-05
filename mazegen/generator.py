@@ -8,6 +8,7 @@ from collections import deque
 from parser import ConfigParser
 from ascii_render import AsciiRenderer
 from encoder import HexEncoder
+from sys import argv
 
 
 class MazeGenerator:
@@ -49,16 +50,13 @@ class MazeGenerator:
         current = self.get_cell(x1, y1)
         neighbor = self.get_cell(x2, y2)
 
-        # Only proceed if both coordinates actually point to valid cells
         if current and neighbor:
-            # Knock down the wall on the current cell's side
             current.walls[direction] = False
 
-            # Identify the matching wall on the neighbor's side using the 'opposite' helper
             opp = opposite[direction]
             neighbor.walls[opp] = False
 
-    def generate(self, start_x=0, start_y=0, animate=False, entry=None, exit=None, rotate_theme=False):
+    def generate(self, start_x=0, start_y=0, animate=False, entry=None, exit=None, rotate_theme=False, perfect_flag=False):
         if entry is None:
             stack = [(start_x, start_y)]
             cell = self.get_cell(start_x, start_y)
@@ -70,9 +68,6 @@ class MazeGenerator:
             exit = (self.width - 1, self.height - 1)
         renderer = AsciiRenderer(self, entry=entry, exit=exit)
 
-        if animate:
-            print(renderer.render())
-            time.sleep(2)
         while stack:
             if animate:
                 os.system('cls' if os.name == 'nt' else 'clear')
@@ -88,6 +83,7 @@ class MazeGenerator:
                         unvisited_neighbors.append((direction, nx, ny))
             if unvisited_neighbors:
                 val = random.choice(unvisited_neighbors)
+                unvisited_neighbors.remove(val)
                 chosen_dir, next_x, next_y = val
                 self.carve_passage(x, y, next_x, next_y, chosen_dir)
 
@@ -101,6 +97,18 @@ class MazeGenerator:
                 stack.append((next_x, next_y))
             else:
                 stack.pop()
+
+        if not perfect_flag:
+            extra_walls_to_break = int((self.width * self.height) / 10)
+            for _ in range(extra_walls_to_break):
+                rx, ry = random.randint(0, self.width-1), random.randint(0, self.height-1)
+                random_dir = random.choice(list(directions.keys()))
+                dx, dy = directions[random_dir]
+                nx, ny = rx + dx, ry + dy
+
+                if self.in_bounds(nx, ny):
+                    self.carve_passage(rx, ry, nx, ny, random_dir)
+
         if not animate:
             os.system('cls' if os.name == 'nt' else 'clear')
             print(renderer.render())
@@ -112,7 +120,7 @@ class MazeGenerator:
             if (rx, ry) != entry and (rx, ry) != exit and (rx, ry) not in self.bonuses:
                 self.bonuses.append((rx, ry))
 
-    def play(self, entry=None, exit=None):
+    def play(self, entry=None, exit=None, halwasa=False):
 
         renderer = AsciiRenderer(self, entry=entry, exit=exit)
         px, py = entry if entry else (0, 0)
@@ -123,7 +131,8 @@ class MazeGenerator:
         visited_path = [(px, py)]
         steps = 0
         hearts = ["\u2665", "\u2665", "\u2665"]
-        
+
+        theme = random.randint(0, 3)
         while True:
             val = "\U0001fb78\U0001fb78\U0001fb78\U0001fb78"
             os.system('cls' if os.name == 'nt' else 'clear')
@@ -132,7 +141,8 @@ class MazeGenerator:
             print(f"Steps: {steps} | Goal: {goal_x, goal_y}")
             print("Use 'W,A,S,D' To Move | Reach The End of The Maze To Win !")
             print("for exit the play mode enter : exit")
-            theme = random.randint(0, 3)
+            if halwasa:
+                theme = random.randint(0, 3)
             print(renderer.render(player_pos=(px, py), visited_trail=visited_path, rotate_theme=True, theme=theme))
 
             if (px, py) == (goal_x, goal_y):
@@ -153,6 +163,9 @@ class MazeGenerator:
             elif move == 'd' and not current_cell.walls['E']:
                 px += 1
             elif move == 'exit':
+                os.system('cls' if os.name == 'nt' else 'clear')
+                self.place_bonuses(count=0, entry=(px, py), exit=(goal_x, goal_y))  # to remove bounses
+                print(renderer.render(rotate_theme=True, theme=theme))
                 break
             else:
                 print("\033[91m You hit a wall!\033[0m")
@@ -222,6 +235,17 @@ class MazeGenerator:
         path.reverse()
         return path
 
+    def path_to_cells(self, entry, path):
+        x, y = entry
+        cell_pos = [(x, y)]
+
+        for direction in path:
+            dx, dy = directions[direction]
+            x += dx
+            y += dy
+            cell_pos.append((x, y))
+        return cell_pos
+
     def show_path(self, entry, exit, path, animate=True, show=True) -> None:
         renderer = AsciiRenderer(self, entry, exit)
 
@@ -238,20 +262,7 @@ class MazeGenerator:
             print(renderer.render(path=set(path), show=show))
 
 
-    def path_to_cells(self, entry, path):
-        x, y = entry
-        cell_pos = [(x, y)]
-
-        for direction in path:
-            dx, dy = directions[direction]
-            x += dx
-            y += dy
-            cell_pos.append((x, y))
-        return cell_pos
-
-
-
-configration = ConfigParser("../config/config.txt")
+configration = ConfigParser(argv[1])
 data = configration.parse()
 
 if data:
@@ -262,25 +273,26 @@ if data:
     perfect = data['PERFECT']
     animate = data['ANIMATE']
     output_file = data['OUTPUT_FILE']
+    halwasa_mode = data['HALWASA']
 
     maze = MazeGenerator(width, height)
-    maze.generate(animate=animate, entry=entry, exit=exit)
+    maze.generate(animate=animate, entry=entry, exit=exit, perfect_flag=perfect)
 
-    
     theme = 0
     show = True
+
     while True:
 
         directions_path = maze.solve_bfs(entry, exit)
         out_path = ""
         for i in directions_path:
             out_path += i
-        
+
         encoder = HexEncoder(maze.grid, width=width, height=height, entry=entry, exit=exit, path=out_path)
         output = encoder.encode()
 
         with open(output_file, "w") as file:
-                    file.write(output)
+            file.write(output)
 
         directions_path = maze.solve_bfs(entry, exit)
         coordinates_path = maze.path_to_cells(entry, directions_path)
@@ -303,9 +315,10 @@ if data:
         if choice not in options.keys():
             print("invalid option")
         elif choice == 1:
+            show = True
             os.system('cls' if os.name == 'nt' else 'clear')
             maze = MazeGenerator(width, height)
-            maze.generate(animate=animate, entry=entry, exit=exit)
+            maze.generate(animate=animate, entry=entry, exit=exit, perfect_flag=perfect)
         elif choice == 2:
 
             if show:
@@ -324,7 +337,9 @@ if data:
                 theme = 0
 
         elif choice == 4:
-            maze.play(entry=entry, exit=exit)
-        elif choice == 5:
-            break
 
+            maze.play(entry=entry, exit=exit, halwasa=halwasa_mode)
+        elif choice == 5:
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print("Exiting The Maze Game !")
+            break
