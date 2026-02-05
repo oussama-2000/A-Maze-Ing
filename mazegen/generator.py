@@ -340,14 +340,11 @@ if data:
             if show:
                 maze.show_path(entry=entry, exit=exit, path=coordinates_path, animate=animate)
                 show = False
-                flag = False
             elif not show:
                 maze.show_path(entry=entry, exit=exit, path=coordinates_path, animate=animate, show=show)
                 show = True
         elif choice == 3:
-
-            if not flag:
-                show = True
+            show = True
             os.system('cls' if os.name == 'nt' else 'clear')
             renderer = AsciiRenderer(maze=maze, entry=entry, exit=exit)
             print(renderer.render(rotate_theme=True, theme=theme))
