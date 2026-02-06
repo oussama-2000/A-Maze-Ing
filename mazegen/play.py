@@ -2,12 +2,20 @@ from ascii_render import AsciiRenderer
 import os
 import time
 import random
-
+import os
 
 class PlayMode:
 
     def play(maze, entry=None, exit=None, halwasa=False) -> None:
+        os.system('cls' if os.name == 'nt' else 'clear')
+        time.sleep(2)
+        intor = "\033[1;31mhury up dixter to night is the night\033[0m"
 
+        for c in intor:
+            print(c, end="", flush=True)
+            time.sleep(.2)
+
+        time.sleep(1)
         renderer = AsciiRenderer(maze, entry=entry, exit=exit)
         px, py = entry if entry else (0, 0)
         goal_x, goal_y = exit if exit else (maze.width - 1, maze.height - 1)
@@ -16,23 +24,24 @@ class PlayMode:
 
         visited_path = [(px, py)]
         steps = 0
-        hearts = ["\u2665", "\u2665", "\u2665"]
+        hearts = ["\033[1;31m\u2665\033[0m", "\033[1;31m\u2665\033[0m", "\033[1;31m\u2665\033[0m"]
 
         theme = random.randint(0, 3)
         while True:
-            val = "\U0001fb78\U0001fb78\U0001fb78\U0001fb78"
             os.system('cls' if os.name == 'nt' else 'clear')
-            print(f"{val} Maze Runner {val}")
-            print("Hearts:", hearts)
-            print(f"Steps: {steps} | Goal: {goal_x, goal_y}")
-            print("Use 'W,A,S,D' To Move | Reach The End of The Maze To Win !")
-            print("for exit the play mode enter : exit")
+            print("Hearts: ", end="")
+            for heart in hearts:
+                print(heart, end=" ")
+            print()
+            print(f"Steps: {steps} | Victim: {goal_x, goal_y}")
+            print("Use 'W,A,S,D' To Move \nReach The Victim and remember:\033[1;31m don't be catched !\033[0m")
+            print("to exit the play mode enter : exit \n\n")
             if halwasa:
                 theme = random.randint(0, 3)
             print(renderer.render(player_pos=(px, py), visited_trail=visited_path, rotate_theme=True, theme=theme))
 
             if (px, py) == (goal_x, goal_y):
-                print("\033[92m We Have A Winner! \033[0m")
+                print("\033[92m Youe did good Find a place! \033[0m")
                 break
 
             move = input("Move: ").lower()
@@ -63,7 +72,7 @@ class PlayMode:
                 time.sleep(0.5)
             new_pos = (px, py)
             if new_pos in maze.bonuses:
-                hearts.append("\u2665")
+                hearts.append("\033[1;31m\u2665\033[0m")
                 maze.bonuses.remove(new_pos)
                 print("\033[92m +1 Heart Bonus! \033[0m")
                 time.sleep(1)

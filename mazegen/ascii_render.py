@@ -104,13 +104,14 @@ class AsciiRenderer:
             row_str = V_WALL
             for x in range(width):
                 if (x, y) == player_pos:
-                    body = f" \033[{origin_theme['player']}m\U0001fbb2\033[0m "
+                    body = f" \033[1;{origin_theme['player']}m\U0001fbb2\033[0m "
                 elif (x, y) == self.entry:
-                    body = f" \033[{origin_theme['entry']}m\U0001f3da\033[0m "
+                    body = f" \033[1;{origin_theme['entry']}m\U0001f3da\033[0m "
                 elif (x, y) == self.exit:
-                    body = f" \033[1{origin_theme['target']}m\U0001fbc9\033[0m "
+                    # body = f" \033[1;{origin_theme['target']}m\U0001fbc9\033[0m "
+                    body = f"\033[1;{origin_theme['target']}m\U0001f46d\033[0m "
                 elif hasattr(self.maze, 'bonuses') and (x, y) in self.maze.bonuses:
-                    body = f" \033[{origin_theme['bonuses']}m\U0001fbc4\033[0m "
+                    body = f" \033[0;{origin_theme['bonuses']}m\U0001fbc4\033[0m "
                 elif visited_trail and (x, y) in visited_trail:
                     body = f" \033[{origin_theme['visited_cells']}m\u25aa\033[0m "
                 elif path and (x, y) in path and show:
