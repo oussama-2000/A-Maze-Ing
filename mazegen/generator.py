@@ -55,21 +55,20 @@ class MazeGenerator:
             neighbor.walls[opp] = False
 
     def generate(self,
-                 start_x=0,
-                 start_y=0,
                  animate=False,
                  entry=None,
                  exit=None,
                  perfect_flag=False
                  ) -> None:
+        # when the 42 block should shows up
+        if self.width >= 9 and self.height >= 7:
+            blocked_positions = Coordinates.forty_two_cells(self.width, self.height)
+            for bx, by in blocked_positions:
+                blocked_cell = self.get_cell(bx, by)
+                if blocked_cell:
+                    blocked_cell.blocked = True
 
-        blocked_positions = Coordinates.forty_two_cells(self.width, self.height)
-
-        for x, y in blocked_positions:
-            if self.in_bounds(x, y):
-                self.get_cell(x, y).blocked = True
-
-        px, py = entry if entry else (start_x, start_y)
+        px, py = entry if entry else (0, 0)
         stack = [(px, py)]
 
         cell = self.get_cell(px, py)
@@ -77,13 +76,14 @@ class MazeGenerator:
             cell.visited = True
         if exit is None:
             exit = (self.width - 1, self.height - 1)
+
         renderer = AsciiRenderer(self, entry=entry, exit=exit)
 
         while stack:
             if animate:
                 os.system('cls' if os.name == 'nt' else 'clear')
                 print(renderer.render(player_pos=stack[-1]))
-                time.sleep(0.1)
+                time.sleep(0.01)
 
             x, y = stack[-1]
             unvisited_neighbors = []
@@ -96,7 +96,6 @@ class MazeGenerator:
                         unvisited_neighbors.append((direction, nx, ny))
 
             if unvisited_neighbors:
-                # if cell and neighbor and not cell.blocked and not neighbor.blocked:
                 val = random.choice(unvisited_neighbors)
                 unvisited_neighbors.remove(val)
                 chosen_dir, next_x, next_y = val
@@ -105,7 +104,7 @@ class MazeGenerator:
                 if animate:
                     os.system('cls' if os.name == 'nt' else 'clear')
                     print(renderer.render(player_pos=(next_x, next_y)))
-                    time.sleep(0.02)
+                    time.sleep(0.01)
 
                 neighbor_cell = self.get_cell(next_x, next_y)
                 neighbor_cell.visited = True
@@ -120,8 +119,10 @@ class MazeGenerator:
                 random_dir = random.choice(list(Coordinates.directions.keys()))
                 dx, dy = Coordinates.directions[random_dir]
                 nx, ny = rx + dx, ry + dy
-
-                if self.in_bounds(nx, ny):
+                # to make sure if it's owned by 42 block
+                curent_cell = self.get_cell(rx, ry)
+                next_cell = self.get_cell(nx, ny)
+                if self.in_bounds(nx, ny) and not curent_cell.blocked and not next_cell.blocked:
                     self.carve_passage(rx, ry, nx, ny, random_dir)
 
         if not animate:
@@ -145,7 +146,8 @@ class MazeGenerator:
                 visible_path.add(cell)
                 os.system('cls' if os.name == 'nt' else 'clear')
                 print(renderer.render(path=visible_path, show=show))
-                time.sleep(0.05)
+                if show:
+                    time.sleep(0.05)
         else:
             os.system('cls' if os.name == 'nt' else 'clear')
             print(renderer.render(path=set(path), show=show))
@@ -184,6 +186,7 @@ if data:
             file.write(output)
 
         directions_path = Solver.solve_bfs(maze=maze, entry=entry, exit=exit)
+
         coordinates_path = Solver.path_to_cells(maze=maze, entry=entry, path=directions_path)
 
         print("="*10, "A-Maze-Ing", "="*10)

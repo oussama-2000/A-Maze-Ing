@@ -55,9 +55,6 @@ class ConfigParser:
     def validate(self) -> bool:
         w, h = self.config["WIDTH"], self.config["HEIGHT"]
 
-        if w == h:
-            print("the maze area must be 2x3 but not 3x3")
-            return
         if w <= 0 or h <= 0:
             raise ValueError("Width And Height Must Be Positive .")
 
