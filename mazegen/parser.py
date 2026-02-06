@@ -1,5 +1,6 @@
 class ConfigParser:
-    def __init__(self, filepath: str):
+
+    def __init__(self, filepath: str) -> None:
         self.filepath = filepath
         self.config = {
             "WIDTH": 0,
@@ -33,7 +34,7 @@ class ConfigParser:
             print(f"Configuration Error: {e}")
             raise
 
-    def assign_value(self, key, value):
+    def assign_value(self, key, value) -> None:
         try:
             if key in ["WIDTH", "HEIGHT"]:
                 self.config[key] = int(value)
@@ -51,7 +52,7 @@ class ConfigParser:
         except Exception:
             raise ValueError(f"Could Not Parse '{value} for key '{key}")
 
-    def validate(self):
+    def validate(self) -> bool:
         w, h = self.config["WIDTH"], self.config["HEIGHT"]
 
         if w == h:

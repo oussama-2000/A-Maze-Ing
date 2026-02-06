@@ -1,3 +1,5 @@
+from coordinates import Coordinates
+
 
 class AsciiRenderer:
 
@@ -6,7 +8,14 @@ class AsciiRenderer:
         self.entry = entry
         self.exit = exit
 
-    def render(self, player_pos=None, visited_trail=None, path=None, rotate_theme=False, theme=None, show=True):
+    def render(self,
+               player_pos=None,
+               visited_trail=None,
+               path=None,
+               rotate_theme=False,
+               theme=None,
+               show=True
+               ) -> None:
 
         colors = [31, 32, 33, 34, 35, 36, 39, 93]
 
@@ -97,13 +106,12 @@ class AsciiRenderer:
                     body = f" \033[{origin_theme['bonuses']}m\U0001fbc4\033[0m "
                 elif visited_trail and (x, y) in visited_trail:
                     body = f" \033[{origin_theme['visited_cells']}m\u25aa\033[0m "
-                elif path and (x, y) in path:
-                    if show:
-                        body = f" \033[{origin_theme['path']}m\u25aa\033[0m "
-                    else:
-                        body = "   "
+                elif path and (x, y) in path and show:
+                    body = f" \033[{origin_theme['path']}m\u25aa\033[0m "
                 else:
                     body = "   "
+                if Coordinates.check_forty_two_place((x, y), width, height):
+                    body = "\033[32m\u2588\u2588\u2588\033[0m"
 
                 # East Wall:
                 wall_char = V_WALL if self.maze.get_cell(x, y).walls["E"] or x == width - 1 else " "

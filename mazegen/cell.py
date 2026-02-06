@@ -1,5 +1,5 @@
 class Cell:
-    """Represents a single square (node) in the maze grid."""
+    """represents a single square in the maze grid."""
     def __init__(self) -> None:
         self.walls = {
             "N": True,
@@ -8,3 +8,4 @@ class Cell:
             "W": True
         }
         self.visited = False
+        self.blocked = False  # owned by 42

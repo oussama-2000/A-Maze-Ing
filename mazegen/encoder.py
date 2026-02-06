@@ -1,8 +1,9 @@
 class HexEncoder:
+
     bit_map = {'N': 1, 'E': 2, 'S': 4, 'W': 8}
     hex_chars = "0123456789ABCDEF"
 
-    def __init__(self, grid, width, height, entry, exit, path=""):
+    def __init__(self, grid, width, height, entry, exit, path="") -> None:
         """Initialize with the generated maze grid."""
         self.grid = grid
         self.w = width
@@ -11,7 +12,7 @@ class HexEncoder:
         self.exit = exit
         self.path = path
 
-    def encode(self):
+    def encode(self) -> str:
         hex_grid = []
         for y in range(0, self.h):
             row_str = ""
