@@ -2,18 +2,17 @@ from ascii_render import AsciiRenderer
 import os
 import time
 import random
-import os
 
 class PlayMode:
 
     def play(maze, entry=None, exit=None, halwasa=False) -> None:
         os.system('cls' if os.name == 'nt' else 'clear')
         time.sleep(2)
-        intor = "\033[1;31mhury up dixter to night is the night\033[0m"
+        intor = "\033[1;31mHury Up Dexter Tonight is The Night !\033[0m"
 
         for c in intor:
             print(c, end="", flush=True)
-            time.sleep(.2)
+            time.sleep(.1)
 
         time.sleep(1)
         renderer = AsciiRenderer(maze, entry=entry, exit=exit)
@@ -34,7 +33,7 @@ class PlayMode:
                 print(heart, end=" ")
             print()
             print(f"Steps: {steps} | Victim: {goal_x, goal_y}")
-            print("Use 'W,A,S,D' To Move \nReach The Victim and remember:\033[1;31m don't be catched !\033[0m")
+            print("Use 'W,A,S,D' To Move \nReach The Victim and remember:\n\033[1;31m1 - Don't Be Catched !\033[0m\n\033[1;31m2 - Don't Leave Evidance Behind You\033[0m")
             print("to exit the play mode enter : exit \n\n")
             if halwasa:
                 theme = random.randint(0, 3)
@@ -63,11 +62,12 @@ class PlayMode:
                 print(renderer.render(rotate_theme=True, theme=theme))
                 break
             else:
-                print("\033[91m You hit a wall!\033[0m")
-                print("Player x:", px, "Player y:", py)
+                print("\033[91m Shhh Don't Make Noise ! \033[0m")
+                print("Morgan x:", px, "Morgan y:", py)
+                time.sleep(0.3)
                 hearts.pop()
                 if not hearts:
-                    print("You Lose All Your Hearts")
+                    print("You've Been Caught By Mimai Metro !")
                     break
                 time.sleep(0.5)
             new_pos = (px, py)
