@@ -1,3 +1,5 @@
+from coordinates import Coordinates
+
 
 class AsciiRenderer:
 
@@ -6,7 +8,14 @@ class AsciiRenderer:
         self.entry = entry
         self.exit = exit
 
-    def render(self, player_pos=None, visited_trail=None, path=None, rotate_theme=False, theme=None, show=True):
+    def render(self,
+               player_pos=None,
+               visited_trail=None,
+               path=None,
+               rotate_theme=False,
+               theme=None,
+               show=True
+               ) -> None:
 
         colors = [31, 32, 33, 34, 35, 36, 39, 93]
 
@@ -84,26 +93,36 @@ class AsciiRenderer:
         # 1. top border
         output = TL + (h_seg + J_TOP) * (width - 1) + h_seg + TR + "\n"
 
+        # arrows = {
+        #     'left': ' \u2190 ',
+        #     'right': ' \u2192 ',
+        #     'up': ' \u2191 ',
+        #     'down': ' \u2193 '
+        # }
+
         for y in range(height):
             row_str = V_WALL
             for x in range(width):
                 if (x, y) == player_pos:
-                    body = f" \033[{origin_theme['player']}m\U0001fbb2\033[0m "
+                    body = f" \033[1;{origin_theme['player']}m\U0001fbb2\033[0m "
                 elif (x, y) == self.entry:
-                    body = f" \033[{origin_theme['entry']}m\U0001f3da\033[0m "
+                    body = f" \033[1;{origin_theme['entry']}m\U0001f3da\033[0m "
                 elif (x, y) == self.exit:
-                    body = f" \033[1{origin_theme['target']}m\U0001fbc9\033[0m "
+                    # body = f" \033[1;{origin_theme['target']}m\U0001fbc9\033[0m "
+                    body = f"\033[1;{origin_theme['target']}m\U0001f46d\033[0m "
                 elif hasattr(self.maze, 'bonuses') and (x, y) in self.maze.bonuses:
-                    body = f" \033[{origin_theme['bonuses']}m\U0001fbc4\033[0m "
+                    body = f" \033[0;{origin_theme['bonuses']}m\U0001fbc4\033[0m "
                 elif visited_trail and (x, y) in visited_trail:
-                    body = f" \033[{origin_theme['visited_cells']}m\u2588\033[0m "
+                    body = f" \033[{origin_theme['visited_cells']}m\u25aa\033[0m "
                 elif path and (x, y) in path:
                     if show:
-                        body = f" \033[{origin_theme['path']}m\u2588\033[0m "
+                        body = f" \033[{origin_theme['path']}m\u25aa\033[0m "
                     else:
                         body = "   "
                 else:
                     body = "   "
+                if (x, y) in Coordinates.forty_two_cells(width, height) and width >= 9 and height >= 7:
+                    body = "\033[32m\u2588\u2588\u2588\033[0m"
 
                 # East Wall:
                 wall_char = V_WALL if self.maze.get_cell(x, y).walls["E"] or x == width - 1 else " "
