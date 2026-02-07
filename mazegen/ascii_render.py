@@ -27,7 +27,8 @@ class AsciiRenderer:
             'target': colors[3],
             'path': colors[4],
             'bonuses': colors[5],
-            'visited_cells': colors[2]
+            'visited_cells': colors[2],
+            'cells_42': colors[6],
         }
 
         theme_1 = {
@@ -38,7 +39,8 @@ class AsciiRenderer:
             'target': colors[6],
             'path': colors[3],
             'bonuses': colors[5],
-            'visited_cells': colors[0]
+            'visited_cells': colors[0],
+            'cells_42': colors[7],
         }
         theme_2 = {
             'walls': colors[2],
@@ -48,7 +50,8 @@ class AsciiRenderer:
             'target': colors[6],
             'path': colors[4],
             'bonuses': colors[3],
-            'visited_cells': colors[1]
+            'visited_cells': colors[1],
+            'cells_42': colors[5],
         }
         theme_3 = {
             'walls': colors[0],
@@ -58,7 +61,8 @@ class AsciiRenderer:
             'target': colors[5],
             'path': colors[4],
             'bonuses': colors[2],
-            'visited_cells': colors[1]
+            'visited_cells': colors[1],
+            'cells_42': colors[6],
         }
         theme_4 = {
             'walls': colors[1],
@@ -68,7 +72,8 @@ class AsciiRenderer:
             'target': colors[4],
             'path': colors[3],
             'bonuses': colors[5],
-            'visited_cells': colors[7]
+            'visited_cells': colors[7],
+            'cells_42': colors[7],
         }
 
         themes = theme_1, theme_2, theme_3, theme_4
@@ -122,7 +127,8 @@ class AsciiRenderer:
                 else:
                     body = "   "
                 if (x, y) in Coordinates.forty_two_cells(width, height) and width >= 9 and height >= 7:
-                    body = "\033[32m\u2588\u2588\u2588\033[0m"
+                    # body = "\033[32m\u2588\u2588\u2588\033[0m"
+                    body = f" \033[0;{origin_theme['cells_42']}m\u2588\033[0m "
 
                 # East Wall:
                 wall_char = V_WALL if self.maze.get_cell(x, y).walls["E"] or x == width - 1 else " "
