@@ -1,4 +1,4 @@
-from coordinates import Coordinates
+from mazegen.coordinates import Coordinates
 
 
 class AsciiRenderer:
@@ -18,6 +18,7 @@ class AsciiRenderer:
                ) -> None:
 
         colors = [31, 32, 33, 34, 35, 36, 39, 93]
+        # colors = [91, 92, 94, 95, 96, 97, 93, 33]
 
         origin_theme = {
             'walls': colors[0],
@@ -27,7 +28,8 @@ class AsciiRenderer:
             'target': colors[3],
             'path': colors[4],
             'bonuses': colors[5],
-            'visited_cells': colors[2]
+            'visited_cells': colors[2],
+            'cells_42': colors[6],
         }
 
         theme_1 = {
@@ -38,7 +40,8 @@ class AsciiRenderer:
             'target': colors[6],
             'path': colors[3],
             'bonuses': colors[5],
-            'visited_cells': colors[0]
+            'visited_cells': colors[0],
+            'cells_42': colors[7],
         }
         theme_2 = {
             'walls': colors[2],
@@ -48,7 +51,8 @@ class AsciiRenderer:
             'target': colors[6],
             'path': colors[4],
             'bonuses': colors[3],
-            'visited_cells': colors[1]
+            'visited_cells': colors[1],
+            'cells_42': colors[5],
         }
         theme_3 = {
             'walls': colors[0],
@@ -58,7 +62,8 @@ class AsciiRenderer:
             'target': colors[5],
             'path': colors[4],
             'bonuses': colors[2],
-            'visited_cells': colors[1]
+            'visited_cells': colors[1],
+            'cells_42': colors[6],
         }
         theme_4 = {
             'walls': colors[1],
@@ -68,7 +73,8 @@ class AsciiRenderer:
             'target': colors[4],
             'path': colors[3],
             'bonuses': colors[5],
-            'visited_cells': colors[7]
+            'visited_cells': colors[7],
+            'cells_42': colors[7],
         }
 
         themes = theme_1, theme_2, theme_3, theme_4
@@ -108,19 +114,21 @@ class AsciiRenderer:
                 elif (x, y) == self.entry:
                     body = f" \033[1;{origin_theme['entry']}m\U0001f3da\033[0m "
                 elif (x, y) == self.exit:
-                    # body = f" \033[1;{origin_theme['target']}m\U0001fbc9\033[0m "
                     body = f"\033[1;{origin_theme['target']}m\U0001f46d\033[0m "
                 elif hasattr(self.maze, 'bonuses') and (x, y) in self.maze.bonuses:
                     body = f" \033[0;{origin_theme['bonuses']}m\U0001fbc4\033[0m "
                 elif visited_trail and (x, y) in visited_trail:
                     body = f" \033[{origin_theme['visited_cells']}m\u25aa\033[0m "
-                elif path and (x, y) in path and show:
-
-                    body = f" \033[{origin_theme['path']}m\u25aa\033[0m "
+                elif path and (x, y) in path:
+                    if show:
+                        body = f" \033[{origin_theme['path']}m\u25aa\033[0m "
+                    else:
+                        body = "   "
                 else:
                     body = "   "
                 if (x, y) in Coordinates.forty_two_cells(width, height) and width >= 9 and height >= 7:
-                    body = "\033[32m\u2588\u2588\u2588\033[0m"
+                    # body = "\033[32m\u2588\u2588\u2588\033[0m"
+                    body = f" \033[0;{origin_theme['cells_42']}m\u2588\033[0m "
 
                 # East Wall:
                 wall_char = V_WALL if self.maze.get_cell(x, y).walls["E"] or x == width - 1 else " "

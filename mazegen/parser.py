@@ -14,6 +14,7 @@ class ConfigParser:
         }
 
     def parse(self) -> dict:
+        keys_count = 0
         try:
             with open(self.filepath, 'r') as file:
                 for line in file:
@@ -22,20 +23,32 @@ class ConfigParser:
                         continue
                     if '=' in line:
                         key, value = line.split('=', 1)
-                        self.assign_value(key.strip().upper(), value.strip())
+                        if len(line.split('=')) > 2:
+                            raise ValueError(f"This Line '{line}' Should Contain Exactly The Format key = value")
+                    if '=' not in line:
+                        raise ValueError(f"use # to make comments in {self.filepath}")
+                    if key.strip() not in self.config.keys():
+                        raise ValueError(f"Unsuported key :{key}")
+                    self.assign_value(key.strip().upper(), value.strip())
+                    keys_count += 1
+
+            if keys_count != len(self.config.keys()):
+                raise ValueError("Make Sure Youe Entered The Require Entries")
+
             if self.validate():
                 return self.config
             else:
                 return
         except FileNotFoundError:
             print(f"Error: The File '{self.filepath}' Was Not Found !")
-            raise
+        except PermissionError:
+            print(f"Error: Can't Access to '{self.filepath}' Make Sure You Have The Permission")
         except ValueError as e:
             print(f"Configuration Error: {e}")
-            raise
 
     def assign_value(self, key, value) -> None:
         try:
+
             if key in ["WIDTH", "HEIGHT"]:
                 self.config[key] = int(value)
             elif key in ["ENTRY", "EXIT"]:
@@ -60,7 +73,18 @@ class ConfigParser:
 
         if self.config["ENTRY"] == self.config["EXIT"]:
             raise ValueError("Entry and Exit must be different")
-        for label, (x, y) in [("ENTRY", self.config["ENTRY"]), ("EXIT", self.config["EXIT"])]:
-            if (x < 0) or (x >= w) or (y < 0) or (y >= h):
-                raise ValueError(f"{label} {x},{y} is outside The {w}x{h} grid !")
+
+        try:
+            entry_x, entry_y = self.config["ENTRY"]
+            exit_x, exit_y = self.config["EXIT"]
+        except ValueError:
+            raise ValueError("Entry and Exit Coordinates Should be Exactly two dimentions")
+
+
+        if (entry_x < 0) or (entry_x >= w) or (entry_y < 0) or (entry_y >= h):
+            raise ValueError(f"Entry {entry_x},{entry_y} is outside The {w}x{h} grid !")
+
+        if (exit_x < 0) or (exit_x >= w) or (exit_y < 0) or (exit_y >= h):
+            raise ValueError(f"Exit {exit_x},{exit_y} is outside The {w}x{h} grid !")
+
         return True
