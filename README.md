@@ -1,3 +1,9 @@
+resource:
+https://youtu.be/ioUl1M77hww?si=rY_LKxkN0dleR-Tm
+
+
+
+
 Perfect. You’re asking the **right question at the right time**.
 Here is the **exact coding order** you should follow — **step by step**, no skipping, no chaos.
 
