@@ -1,5 +1,5 @@
 from collections import deque
-from coordinates import Coordinates
+from mazegen.coordinates import Coordinates
 
 
 class Solver:

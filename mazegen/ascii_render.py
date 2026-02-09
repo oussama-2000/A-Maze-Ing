@@ -1,4 +1,4 @@
-from coordinates import Coordinates
+from mazegen.coordinates import Coordinates
 
 
 class AsciiRenderer:
@@ -18,7 +18,6 @@ class AsciiRenderer:
                ) -> None:
 
         colors = [31, 32, 33, 34, 35, 36, 39, 93]
-        # colors = [91, 92, 94, 95, 96, 97, 93, 33]
 
         origin_theme = {
             'walls': colors[0],
@@ -26,7 +25,7 @@ class AsciiRenderer:
             'player': colors[7],
             'entry': colors[6],
             'target': colors[3],
-            'path': colors[4],
+            'path': colors[2],
             'bonuses': colors[5],
             'visited_cells': colors[2],
             'cells_42': colors[6],
@@ -114,7 +113,6 @@ class AsciiRenderer:
                 elif (x, y) == self.entry:
                     body = f" \033[1;{origin_theme['entry']}m\U0001f3da\033[0m "
                 elif (x, y) == self.exit:
-                    # body = f" \033[1;{origin_theme['target']}m\U0001fbc9\033[0m "
                     body = f"\033[1;{origin_theme['target']}m\U0001f46d\033[0m "
                 elif hasattr(self.maze, 'bonuses') and (x, y) in self.maze.bonuses:
                     body = f" \033[0;{origin_theme['bonuses']}m\U0001fbc4\033[0m "

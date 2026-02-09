@@ -1,15 +1,9 @@
 import random
 import time
 import os
-from cell import Cell
-from coordinates import Coordinates
-from parser import ConfigParser
-from ascii_render import AsciiRenderer
-from encoder import HexEncoder
-from sys import argv
-from play import PlayMode
-from solver import Solver
-
+from mazegen.cell import Cell
+from mazegen.coordinates import Coordinates
+from mazegen.ascii_render import AsciiRenderer
 
 
 class MazeGenerator:
@@ -116,10 +110,11 @@ class MazeGenerator:
             extra_walls_to_break = int((self.width * self.height) / 10)
             for _ in range(extra_walls_to_break):
                 rx, ry = random.randint(0, self.width-1), random.randint(0, self.height-1)
+
                 random_dir = random.choice(list(Coordinates.directions.keys()))
                 dx, dy = Coordinates.directions[random_dir]
                 nx, ny = rx + dx, ry + dy
-                # to make sure if it's owned by 42 block
+
                 curent_cell = self.get_cell(rx, ry)
                 next_cell = self.get_cell(nx, ny)
                 if self.in_bounds(nx, ny) and not curent_cell.blocked and not next_cell.blocked:
@@ -153,85 +148,3 @@ class MazeGenerator:
             print(renderer.render(path=set(path), show=show))
 
 
-configration = ConfigParser(argv[1])
-data = configration.parse()
-
-if data:
-    width = data['WIDTH']
-    height = data['HEIGHT']
-    entry = data['ENTRY']
-    exit = data['EXIT']
-    perfect = data['PERFECT']
-    animate = data['ANIMATE']
-    output_file = data['OUTPUT_FILE']
-    halwasa_mode = data['HALWASA']
-
-    maze = MazeGenerator(width, height)
-    maze.generate(animate=animate, entry=entry, exit=exit, perfect_flag=perfect)
-
-    theme = 0
-    show = True
-
-    while True:
-
-        directions_path = Solver.solve_bfs(maze=maze, entry=entry, exit=exit)
-        out_path = ""
-        for i in directions_path:
-            out_path += i
-
-        encoder = HexEncoder(maze.grid, width=width, height=height, entry=entry, exit=exit, path=out_path)
-        output = encoder.encode()
-
-        with open(output_file, "w") as file:
-            file.write(output)
-
-        directions_path = Solver.solve_bfs(maze=maze, entry=entry, exit=exit)
-
-        coordinates_path = Solver.path_to_cells(maze=maze, entry=entry, path=directions_path)
-
-        print("="*10, "A-Maze-Ing", "="*10)
-        options = {
-            1: 're-generate a new maze',
-            2: 'show/hide path from entry to exit',
-            3: 'rotate maze colors',
-            4: 'player mode',
-            5: 'quit',
-        }
-
-        for key, option in options.items():
-            print(f'{key}. {option}')
-        try:
-            choice = int(input("Choice: "))
-        except ValueError:
-            print("invalid option")
-        if choice not in options.keys():
-            print("invalid option")
-        elif choice == 1:
-            show = True
-            os.system('cls' if os.name == 'nt' else 'clear')
-            maze = MazeGenerator(width, height)
-            maze.generate(animate=animate, entry=entry, exit=exit, perfect_flag=perfect)
-        elif choice == 2:
-
-            if show:
-                maze.show_path(entry=entry, exit=exit, path=coordinates_path, animate=animate)
-                show = False
-            elif not show:
-                maze.show_path(entry=entry, exit=exit, path=coordinates_path, animate=animate, show=show)
-                show = True
-        elif choice == 3:
-
-            os.system('cls' if os.name == 'nt' else 'clear')
-            renderer = AsciiRenderer(maze=maze, entry=entry, exit=exit)
-            print(renderer.render(rotate_theme=True, theme=theme))
-            theme += 1
-            if theme > 3:
-                theme = 0
-
-        elif choice == 4:
-
-            PlayMode.play(maze=maze, entry=entry, exit=exit, halwasa=halwasa_mode)
-        elif choice == 5:
-            os.system('cls' if os.name == 'nt' else 'clear')
-            print("Exiting The Maze Game !")
-            break
