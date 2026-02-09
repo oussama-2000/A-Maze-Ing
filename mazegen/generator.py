@@ -7,6 +7,16 @@ from mazegen.ascii_render import AsciiRenderer
 
 
 class MazeGenerator:
+    """
+        Instantiation :
+            instance_name = MazeGenerator(width, height)
+            for example:
+                maze = MazeGenerator(15, 17)
+        Access :
+            To access a maze solution you can do:
+                solution_path = Solver.solve_bfs(instance_name, entry, exit)
+
+    """
     def __init__(self, width: int, height: int) -> None:
 
         self.width = width
@@ -37,7 +47,7 @@ class MazeGenerator:
             return None
         return self.grid[y][x]
 
-    def carve_passage(self, x1, y1, x2, y2, direction) -> None:
+    def carve(self, x1, y1, x2, y2, direction) -> None:
 
         current = self.get_cell(x1, y1)
         neighbor = self.get_cell(x2, y2)
@@ -48,12 +58,13 @@ class MazeGenerator:
             opp = Coordinates.opposite[direction]
             neighbor.walls[opp] = False
 
-    def generate(self,
-                 animate=False,
-                 entry=None,
-                 exit=None,
-                 perfect_flag=False
-                 ) -> None:
+    def generate_DFS(self,
+                     animate=False,
+                     entry=None,
+                     exit=None,
+                     perfect_flag=False
+                     ) -> None:
+
         # when the 42 block should shows up
         if self.width >= 9 and self.height >= 7:
             blocked_positions = Coordinates.forty_two_cells(self.width, self.height)
@@ -93,7 +104,7 @@ class MazeGenerator:
                 val = random.choice(unvisited_neighbors)
                 unvisited_neighbors.remove(val)
                 chosen_dir, next_x, next_y = val
-                self.carve_passage(x, y, next_x, next_y, chosen_dir)
+                self.carve(x, y, next_x, next_y, chosen_dir)
 
                 if animate:
                     os.system('cls' if os.name == 'nt' else 'clear')
@@ -117,33 +128,8 @@ class MazeGenerator:
                 curent_cell = self.get_cell(rx, ry)
                 next_cell = self.get_cell(nx, ny)
                 if self.in_bounds(nx, ny) and not curent_cell.blocked and not next_cell.blocked:
-                    self.carve_passage(rx, ry, nx, ny, random_dir)
+                    self.carve(rx, ry, nx, ny, random_dir)
 
         if not animate:
             os.system('cls' if os.name == 'nt' else 'clear')
             print(renderer.render())
-
-    def place_bonuses(self, count=3, entry=(0, 0), exit=(0, 0)) -> None:
-        self.bonuses = []
-        while len(self.bonuses) < count:
-            rx, ry = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
-            if (rx, ry) != entry and (rx, ry) != exit and (rx, ry) not in self.bonuses:
-                self.bonuses.append((rx, ry))
-
-    def show_path(self, entry, exit, path, animate=True, show=True) -> None:
-        renderer = AsciiRenderer(self, entry, exit)
-
-        if animate:
-            visible_path = set()
-
-            for cell in path:
-                visible_path.add(cell)
-                os.system('cls' if os.name == 'nt' else 'clear')
-                print(renderer.render(path=visible_path, show=show))
-                if show:
-                    time.sleep(0.05)
-        else:
-            os.system('cls' if os.name == 'nt' else 'clear')
-            print(renderer.render(path=set(path), show=show))
-
-

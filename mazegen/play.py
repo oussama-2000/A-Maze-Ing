@@ -3,7 +3,16 @@ import os
 import time
 import random
 
+
 class PlayMode:
+
+    def place_bonuses(count, maze, entry, exit) -> None:
+        # count = 5
+        maze.bonuses = []
+        while len(maze.bonuses) < count:
+            rx, ry = random.randint(0, maze.width - 1), random.randint(0, maze.height - 1)
+            if (rx, ry) != entry and (rx, ry) != exit and (rx, ry) not in maze.bonuses:
+                maze.bonuses.append((rx, ry))
 
     def play(maze, entry=None, exit=None, halwasa=False) -> None:
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -15,10 +24,10 @@ class PlayMode:
 
         time.sleep(1)
         renderer = AsciiRenderer(maze, entry=entry, exit=exit)
-        px, py = entry if entry else (0, 0)
-        goal_x, goal_y = exit if exit else (maze.width - 1, maze.height - 1)
+        px, py = entry
+        goal_x, goal_y = exit
 
-        maze.place_bonuses(count=5, entry=(px, py), exit=(goal_x, goal_y))
+        PlayMode.place_bonuses(5, maze, entry=(px, py), exit=(goal_x, goal_y))
 
         visited_path = [(px, py)]
         steps = 0
@@ -39,7 +48,7 @@ class PlayMode:
             print(renderer.render(player_pos=(px, py), visited_trail=visited_path, rotate_theme=True, theme=theme))
 
             if (px, py) == (goal_x, goal_y):
-                print("\033[92m Youe did good Find a place! \033[0m")
+                print("\033[92m Youe did good, Find a place! \033[0m")
                 break
 
             move = input("Move: ").lower()
@@ -57,7 +66,7 @@ class PlayMode:
                 px += 1
             elif move == 'exit':
                 os.system('cls' if os.name == 'nt' else 'clear')
-                maze.place_bonuses(count=0, entry=(px, py), exit=(goal_x, goal_y))  # to remove bounses
+                PlayMode.place_bonuses(count=0, maze=maze, entry=(px, py), exit=(goal_x, goal_y))  # to remove bounses
                 print(renderer.render(rotate_theme=True, theme=theme))
                 break
             else:

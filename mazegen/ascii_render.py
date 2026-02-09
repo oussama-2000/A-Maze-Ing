@@ -127,7 +127,6 @@ class AsciiRenderer:
                 else:
                     body = "   "
                 if (x, y) in Coordinates.forty_two_cells(width, height) and width >= 9 and height >= 7:
-                    # body = "\033[32m\u2588\u2588\u2588\033[0m"
                     body = f" \033[0;{origin_theme['cells_42']}m\u2588\033[0m "
 
                 # East Wall:
