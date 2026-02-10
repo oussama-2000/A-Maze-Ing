@@ -1,4 +1,4 @@
-from mazegen.coordinates import Coordinates
+from maze.coordinates import Coordinates
 
 
 class ConfigParser:

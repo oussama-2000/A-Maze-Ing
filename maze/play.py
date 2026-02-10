@@ -1,4 +1,4 @@
-from mazegen.ascii_render import AsciiRenderer
+from maze.ascii_render import AsciiRenderer
 import os
 import time
 import random

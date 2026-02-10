@@ -1,6 +1,6 @@
 from collections import deque
-from mazegen.coordinates import Coordinates
-from mazegen.ascii_render import AsciiRenderer
+from maze.coordinates import Coordinates
+from maze.ascii_render import AsciiRenderer
 import os
 import time
 

@@ -1,9 +1,9 @@
-from mazegen.solver import Solver
-from mazegen.generator import MazeGenerator
-from mazegen.encoder import HexEncoder
-from mazegen.ascii_render import AsciiRenderer
-from mazegen.parser import ConfigParser
-from mazegen.play import PlayMode
+from maze.solver import Solver
+from maze.generator import MazeGenerator
+from maze.encoder import HexEncoder
+from maze.ascii_render import AsciiRenderer
+from maze.parser import ConfigParser
+from maze.play import PlayMode
 from sys import argv
 import os
 
@@ -12,6 +12,9 @@ if __name__ == "__main__":
     try:
         if len(argv) < 2:
             raise ValueError("Error: You Sould Provide The Config File")
+        if len(argv) > 2:
+            raise ValueError("Error: No More Arguments More Than Program "
+                             "and Config file")
         config_file = argv[1]
         configration = ConfigParser(config_file)
         data = configration.parse()

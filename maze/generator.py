@@ -1,9 +1,9 @@
 import random
 import time
 import os
-from mazegen.cell import Cell
-from mazegen.coordinates import Coordinates
-from mazegen.ascii_render import AsciiRenderer
+from maze.cell import Cell
+from maze.coordinates import Coordinates
+from maze.ascii_render import AsciiRenderer
 
 
 class MazeGenerator:
