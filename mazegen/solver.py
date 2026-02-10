@@ -3,17 +3,19 @@ from mazegen.coordinates import Coordinates
 from mazegen.ascii_render import AsciiRenderer
 import os
 import time
+from typing import List, Tuple, Dict, Any
 
 
 class Solver:
-    def solve_bfs(maze, entry, exit) -> list:
+    @staticmethod
+    def solve_bfs(maze: Any, entry: Tuple[int, int],
+                  exit: Tuple[int, int]) -> List[str]:
         start = entry
         goal = exit
 
         queue = deque([start])
-        visited = set([start])
-        parent = {}
-        # {'reached cell(x, y)' : ('from which cell(x, y), 'wich direction') }
+        visited = {start}
+        parent: Dict[Tuple[int, int], Tuple[int, int, str]] = {}
 
         while queue:
             x, y = queue.popleft()
@@ -22,14 +24,13 @@ class Solver:
                 break
 
             cell = maze.get_cell(x, y)
+            if not cell:
+                continue
 
-            # iterating directions to expand neighbors
             for direction, (dx, dy) in Coordinates.directions.items():
-
                 if cell.walls[direction]:
-                    continue  # wall is closed
+                    continue
 
-                # compute neighbor coordinates
                 nx, ny = x + dx, y + dy
 
                 if not maze.in_bounds(nx, ny):
@@ -39,11 +40,14 @@ class Solver:
                     visited.add((nx, ny))
                     parent[(nx, ny)] = (x, y, direction)
                     queue.append((nx, ny))
-                    # add it to queue for next exploration
 
         return Solver.generate_path(maze, parent, entry, exit)
 
-    def generate_path(maze, parent, entry, exit) -> list:
+    @staticmethod
+    def generate_path(maze: Any, parent: Dict[Tuple[int, int],
+                                              Tuple[int, int, str]],
+                      entry: Tuple[int, int],
+                      exit: Tuple[int, int]) -> List[str]:
         path = []
         current = exit
 
@@ -55,7 +59,9 @@ class Solver:
         path.reverse()
         return path
 
-    def path_to_cells(maze, entry, path) -> list:
+    @staticmethod
+    def path_to_cells(maze: Any, entry: Tuple[int, int],
+                      path: List[str]) -> List[Tuple[int, int]]:
         x, y = entry
         cell_pos = [(x, y)]
 
@@ -66,18 +72,21 @@ class Solver:
             cell_pos.append((x, y))
         return cell_pos
 
-    def show_path(maze, entry, exit, path, animate=True, show=True) -> None:
+    @staticmethod
+    def show_path(maze: Any, entry: Tuple[int, int], exit: Tuple[int, int],
+                  path: List[Tuple[int, int]], animate: bool = True,
+                  show: bool = True) -> None:
         renderer = AsciiRenderer(maze, entry, exit)
 
         if animate:
-            visible_path = set()
+            visible_path: List[Tuple[int, int]] = []
 
             for cell in path:
-                visible_path.add(cell)
+                visible_path.append(cell)
                 os.system('cls' if os.name == 'nt' else 'clear')
                 print(renderer.render(path=visible_path, show=show))
                 if show:
                     time.sleep(0.05)
         else:
             os.system('cls' if os.name == 'nt' else 'clear')
-            print(renderer.render(path=set(path), show=show))
+            print(renderer.render(path=list(path), show=show))

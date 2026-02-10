@@ -16,6 +16,7 @@ class Coordinates:
         'W': 'E',
     }
 
+    @staticmethod
     def forty_two_cells(
             maze_width: int,
             maze_height: int

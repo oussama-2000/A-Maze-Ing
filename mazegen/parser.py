@@ -1,11 +1,12 @@
 from mazegen.coordinates import Coordinates
+from typing import List, Dict, Tuple, Optional, Any
 
 
 class ConfigParser:
 
     def __init__(self, filepath: str) -> None:
-        self.filepath = filepath
-        self.config = {
+        self.filepath: str = filepath
+        self.config: Dict[str, Any] = {
             "WIDTH": 0,
             "HEIGHT": 0,
             "ENTRY": (0, 0),
@@ -16,8 +17,8 @@ class ConfigParser:
             "HALWASA": False
         }
 
-    def parse(self) -> dict:
-        keys_count = 0
+    def parse(self) -> Optional[Dict[str, Any]]:
+        keys_count: int = 0
         try:
             with open(self.filepath, 'r') as file:
                 for line in file:
@@ -25,37 +26,50 @@ class ConfigParser:
                     if not line or line.startswith('#'):
                         continue
                     if '=' in line:
-                        key, value = line.split('=', 1)
+                        parts: List[str] = line.split('=', 1)
                         if len(line.split('=')) > 2:
-                            raise ValueError(f"This Line '{line}' Should Contain Exactly The Format key = value")
-                    if '=' not in line:
-                        raise ValueError(f"use # to make comments in {self.filepath}")
-                    if key.strip() not in self.config.keys():
+                            raise ValueError(f"This Line '{line}' Should"
+                                             "Contain Exactly The Format"
+                                             "key = value")
+                        key, value = parts[0], parts[1]
+                    else:
+                        raise ValueError("use # to make "
+                                         f"comments in {self.filepath}")
+
+                    clean_key: str = key.strip().upper()
+                    if clean_key not in self.config:
                         raise ValueError(f"Unsuported key :{key}")
-                    self.assign_value(key.strip().upper(), value.strip())
+
+                    self.assign_value(clean_key, value.strip())
                     keys_count += 1
 
-            if keys_count != len(self.config.keys()):
+            if keys_count != len(self.config):
                 raise ValueError("Make Sure Youe Entered The Require Entries")
 
             if self.validate():
                 return self.config
-            else:
-                return
+            return None
+
         except FileNotFoundError:
             print(f"Error: The File '{self.filepath}' Was Not Found !")
         except PermissionError:
-            print(f"Error: Can't Access to '{self.filepath}' Make Sure You Have The Permission")
+            print(f"Error: Can't Access to '{self.filepath}' "
+                  "Make Sure You Have The Permission")
         except ValueError as e:
             print(f"Configuration Error: {e}")
 
-    def assign_value(self, key, value) -> None:
-        try:
+        return None
 
+    def assign_value(self, key: str, value: str) -> None:
+        try:
             if key in ["WIDTH", "HEIGHT"]:
                 self.config[key] = int(value)
             elif key in ["ENTRY", "EXIT"]:
-                coords = tuple(map(int, value.split(',')))
+                parts: List[int] = [int(x) for x in value.split(',')]
+                if len(parts) != 2:
+                    raise ValueError(f"Key {key} requires exactly"
+                                     "two coordinates (x,y)")
+                coords: Tuple[int, int] = (parts[0], parts[1])
                 self.config[key] = coords
             elif key == "PERFECT":
                 self.config[key] = value.lower() == 'true'
@@ -66,35 +80,50 @@ class ConfigParser:
             elif key == "HALWASA":
                 self.config[key] = value.lower() == 'true'
         except Exception:
-            raise ValueError(f"Could Not Parse '{value} for key '{key}")
+            raise ValueError(f"Could Not Parse '{value}' for key '{key}'")
 
     def validate(self) -> bool:
-        w, h = self.config["WIDTH"], self.config["HEIGHT"]
+        w: int = int(self.config["WIDTH"])
+        h: int = int(self.config["HEIGHT"])
 
         if w <= 0 or h <= 0:
             raise ValueError("Width And Height Must Be Positive .")
         if w < 3 or h < 3:
             raise ValueError("Give Reasonable height and width to make a maze")
 
-        if self.config["ENTRY"] == self.config["EXIT"]:
+        entry: Tuple[int, int] = self.config["ENTRY"]
+        exit_coord: Tuple[int, int] = self.config["EXIT"]
+
+        if entry == exit_coord:
             raise ValueError("Entry and Exit must be different")
 
         if w >= 9 and h >= 7:
-            if self.config["ENTRY"] in Coordinates.forty_two_cells(self.config["WIDTH"], self.config["HEIGHT"]):
-                raise ValueError("Entry Coordinates Should not located in the 42 block")
+            if entry in Coordinates.forty_two_cells(w, h):
+                raise ValueError("Entry Coordinates Should not"
+                                 "located in the 42 block")
 
-            if self.config["EXIT"] in Coordinates.forty_two_cells(self.config["WIDTH"], self.config["HEIGHT"]):
-                raise ValueError("Exit Coordinates Should not located in the 42 block")
+            if exit_coord in Coordinates.forty_two_cells(w, h):
+                raise ValueError("Exit Coordinates Should not"
+                                 "located in the 42 block")
+
+        entry_x: int
+        entry_y: int
+        exit_x: int
+        exit_y: int
+
         try:
-            entry_x, entry_y = self.config["ENTRY"]
-            exit_x, exit_y = self.config["EXIT"]
-        except ValueError:
-            raise ValueError("Entry and Exit Coordinates Should be Exactly two dimentions")
+            entry_x, entry_y = entry
+            exit_x, exit_y = exit_coord
+        except (ValueError, TypeError):
+            raise ValueError("Entry and Exit Coordinates"
+                             "Should be Exactly two dimentions")
 
         if (entry_x < 0) or (entry_x >= w) or (entry_y < 0) or (entry_y >= h):
-            raise ValueError(f"Entry {entry_x},{entry_y} is outside The {w}x{h} grid !")
+            raise ValueError(f"Entry {entry_x},{entry_y}"
+                             f"is outside The {w}x{h} grid !")
 
         if (exit_x < 0) or (exit_x >= w) or (exit_y < 0) or (exit_y >= h):
-            raise ValueError(f"Exit {exit_x},{exit_y} is outside The {w}x{h} grid !")
+            raise ValueError(f"Exit {exit_x},{exit_y}"
+                             f"is outside The {w}x{h} grid !")
 
         return True

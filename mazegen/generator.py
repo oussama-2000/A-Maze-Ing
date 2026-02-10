@@ -100,11 +100,11 @@ class MazeGenerator:
                 if self.in_bounds(nx, ny):
                     neighbor: Optional[Cell] = self.get_cell(nx, ny)
 
-                    nb_short = neighbor.blocked  # Shortest Variable
-                    nv_short = neighbor.visited  # Shortest Variable
-
-                    if neighbor and not nv_short and not nb_short:
-                        unvisited_neighbors.append((direction, nx, ny))
+                    if neighbor:
+                        nb_short: bool = neighbor.blocked
+                        nv_short: bool = neighbor.visited
+                        if not nv_short and not nb_short:
+                            unvisited_neighbors.append((direction, nx, ny))
 
             if unvisited_neighbors:
                 val: Tuple[str, int, int] = random.choice(unvisited_neighbors)
