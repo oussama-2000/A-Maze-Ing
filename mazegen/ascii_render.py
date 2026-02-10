@@ -99,12 +99,6 @@ class AsciiRenderer:
         # 1. top border
         output = TL + (h_seg + J_TOP) * (width - 1) + h_seg + TR + "\n"
 
-        # arrows = {
-        #     'left': ' \u2190 ',
-        #     'right': ' \u2192 ',
-        #     'up': ' \u2191 ',
-        #     'down': ' \u2193 '
-        # }
 
         for y in range(height):
             row_str = V_WALL

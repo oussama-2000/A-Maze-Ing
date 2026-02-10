@@ -73,14 +73,12 @@ class MazeGenerator:
                 if blocked_cell:
                     blocked_cell.blocked = True
 
-        px, py = entry if entry else (0, 0)
+        px, py = entry
         stack = [(px, py)]
 
         cell = self.get_cell(px, py)
         if cell:
             cell.visited = True
-        if exit is None:
-            exit = (self.width - 1, self.height - 1)
 
         renderer = AsciiRenderer(self, entry=entry, exit=exit)
 
@@ -102,7 +100,6 @@ class MazeGenerator:
 
             if unvisited_neighbors:
                 val = random.choice(unvisited_neighbors)
-                unvisited_neighbors.remove(val)
                 chosen_dir, next_x, next_y = val
                 self.carve(x, y, next_x, next_y, chosen_dir)
 

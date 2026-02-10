@@ -64,6 +64,29 @@ class PlayMode:
                 px -= 1
             elif move == 'd' and not current_cell.walls['E']:
                 px += 1
+
+            # cheat codes
+            elif move == 'hplus':
+                print("\033[92m Cheat Code Activated: +1 Heart Added \033[0m")
+                hearts.append("\033[1;31m\u2665\033[0m")
+                time.sleep(0.5)
+            elif move == 'tp':
+                print("\033[92m Cheat Code Activated \033[0m")
+                cheat_x = input("Enter \033[91m'X'\033[0m Value: ")
+                cheat_y = input("Enter \033[91m'Y'\033[0m Value: ")
+                try:
+                    tx = int(cheat_x)
+                    ty = int(cheat_y)
+                    if (tx, ty) in Coordinates.forty_two_cells(maze.width, maze.height):
+                        raise ValueError("Pass...")
+                    else:
+                        px = tx
+                        py = ty
+                except Exception:
+                    print("\033[91m Error: Invalid Corrdinations ! \033[0m")
+                    time.sleep(3)
+            # cheat codes
+
             elif move == 'exit':
                 os.system('cls' if os.name == 'nt' else 'clear')
                 PlayMode.place_bonuses(count=0, maze=maze, entry=(px, py), exit=(goal_x, goal_y))  # to remove bounses
