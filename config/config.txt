@@ -1,12 +1,9 @@
 
-WIDTH=30
-
-HEIGHT=30
+WIDTH=15
+HEIGHT=15
 ENTRY=0,0
-EXIT=9,9
-OUTPUT_FILE=   output_maze.txt
-PERFECT=false
-# bonus
-#dddd
+EXIT=14,14
+OUTPUT_FILE=output_maze.txt
+PERFECT=true
 ANIMATE=false
 HALWASA=false

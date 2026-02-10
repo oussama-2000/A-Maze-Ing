@@ -1,23 +1,33 @@
 import random
 import time
 import os
+from typing import List, Tuple, Optional
 from mazegen.cell import Cell
 from mazegen.coordinates import Coordinates
 from mazegen.ascii_render import AsciiRenderer
 
 
 class MazeGenerator:
+    """
+        Instantiation :
+            instance_name = MazeGenerator(width, height)
+            for example:
+                maze = MazeGenerator(15, 17)
+        Access :
+            To access a maze solution you can do:
+                solution_path = Solver.solve_bfs(instance_name, entry, exit)
+
+    """
     def __init__(self, width: int, height: int) -> None:
+        self.width: int = width
+        self.height: int = height
+        self.grid: List[List[Cell]] = self.create_grid()
 
-        self.width = width
-        self.height = height
-        self.grid = self.create_grid()
-
-    def create_grid(self) -> list:
+    def create_grid(self) -> List[List[Cell]]:
         """creates the maze grid (x, y)"""
-        grid = []
+        grid: List[List[Cell]] = []
         for _ in range(self.height):
-            row = []
+            row: List[Cell] = []
             for _ in range(self.width):
                 row.append(Cell())
             grid.append(row)
@@ -29,7 +39,7 @@ class MazeGenerator:
         """
         return 0 <= x < self.width and 0 <= y < self.height
 
-    def get_cell(self, x: int, y: int):
+    def get_cell(self, x: int, y: int) -> Optional[Cell]:
         """
         Retrieves the Cell object at the given (x, y) coordinates.
         """
@@ -37,41 +47,44 @@ class MazeGenerator:
             return None
         return self.grid[y][x]
 
-    def carve_passage(self, x1, y1, x2, y2, direction) -> None:
-
-        current = self.get_cell(x1, y1)
-        neighbor = self.get_cell(x2, y2)
+    def carve(self, x1: int, y1: int, x2: int, y2: int,
+              direction: str) -> None:
+        current: Optional[Cell] = self.get_cell(x1, y1)
+        neighbor: Optional[Cell] = self.get_cell(x2, y2)
 
         if current and neighbor:
             current.walls[direction] = False
 
-            opp = Coordinates.opposite[direction]
+            opp: str = Coordinates.opposite[direction]
             neighbor.walls[opp] = False
 
-    def generate(self,
-                 animate=False,
-                 entry=None,
-                 exit=None,
-                 perfect_flag=False
-                 ) -> None:
+    def generate_DFS(self,
+                     animate: bool = False,
+                     entry: Optional[Tuple[int, int]] = None,
+                     exit: Optional[Tuple[int, int]] = None,
+                     perfect_flag: bool = False
+                     ) -> None:
+
         # when the 42 block should shows up
         if self.width >= 9 and self.height >= 7:
-            blocked_positions = Coordinates.forty_two_cells(self.width, self.height)
+            ftc = Coordinates.forty_two_cells(self.width, self.height)
+            blocked_positions: List[Tuple[int, int]] = ftc
             for bx, by in blocked_positions:
-                blocked_cell = self.get_cell(bx, by)
+                blocked_cell: Optional[Cell] = self.get_cell(bx, by)
                 if blocked_cell:
                     blocked_cell.blocked = True
 
-        px, py = entry if entry else (0, 0)
-        stack = [(px, py)]
+        if entry is None:
+            return
 
-        cell = self.get_cell(px, py)
+        px, py = entry
+        stack: List[Tuple[int, int]] = [(px, py)]
+
+        cell: Optional[Cell] = self.get_cell(px, py)
         if cell:
             cell.visited = True
-        if exit is None:
-            exit = (self.width - 1, self.height - 1)
 
-        renderer = AsciiRenderer(self, entry=entry, exit=exit)
+        renderer: AsciiRenderer = AsciiRenderer(self, entry=entry, exit=exit)
 
         while stack:
             if animate:
@@ -80,71 +93,53 @@ class MazeGenerator:
                 time.sleep(0.01)
 
             x, y = stack[-1]
-            unvisited_neighbors = []
+            unvisited_neighbors: List[Tuple[str, int, int]] = []
 
             for direction, (dx, dy) in Coordinates.directions.items():
                 nx, ny = x + dx, y + dy
                 if self.in_bounds(nx, ny):
-                    neighbor = self.get_cell(nx, ny)
-                    if neighbor and not neighbor.visited and not neighbor.blocked:
+                    neighbor: Optional[Cell] = self.get_cell(nx, ny)
+
+                    nb_short = neighbor.blocked  # Shortest Variable
+                    nv_short = neighbor.visited  # Shortest Variable
+
+                    if neighbor and not nv_short and not nb_short:
                         unvisited_neighbors.append((direction, nx, ny))
 
             if unvisited_neighbors:
-                val = random.choice(unvisited_neighbors)
-                unvisited_neighbors.remove(val)
+                val: Tuple[str, int, int] = random.choice(unvisited_neighbors)
                 chosen_dir, next_x, next_y = val
-                self.carve_passage(x, y, next_x, next_y, chosen_dir)
+                self.carve(x, y, next_x, next_y, chosen_dir)
 
                 if animate:
                     os.system('cls' if os.name == 'nt' else 'clear')
                     print(renderer.render(player_pos=(next_x, next_y)))
                     time.sleep(0.01)
 
-                neighbor_cell = self.get_cell(next_x, next_y)
-                neighbor_cell.visited = True
-                stack.append((next_x, next_y))
+                neighbor_cell: Optional[Cell] = self.get_cell(next_x, next_y)
+                if neighbor_cell:
+                    neighbor_cell.visited = True
+                    stack.append((next_x, next_y))
             else:
                 stack.pop()
 
         if not perfect_flag:
-            extra_walls_to_break = int((self.width * self.height) / 10)
+            extra_walls_to_break: int = int((self.width * self.height) / 10)
             for _ in range(extra_walls_to_break):
-                rx, ry = random.randint(0, self.width-1), random.randint(0, self.height-1)
+                rx: int = random.randint(0, self.width-1)
+                ry: int = random.randint(0, self.height-1)
 
-                random_dir = random.choice(list(Coordinates.directions.keys()))
+                random_val = random.choice(list(Coordinates.directions.keys()))
+                random_dir: str = random_val
                 dx, dy = Coordinates.directions[random_dir]
                 nx, ny = rx + dx, ry + dy
 
-                curent_cell = self.get_cell(rx, ry)
-                next_cell = self.get_cell(nx, ny)
-                if self.in_bounds(nx, ny) and not curent_cell.blocked and not next_cell.blocked:
-                    self.carve_passage(rx, ry, nx, ny, random_dir)
+                curent_cell: Optional[Cell] = self.get_cell(rx, ry)
+                next_cell: Optional[Cell] = self.get_cell(nx, ny)
+                if self.in_bounds(nx, ny) and curent_cell and next_cell:
+                    if not curent_cell.blocked and not next_cell.blocked:
+                        self.carve(rx, ry, nx, ny, random_dir)
 
         if not animate:
             os.system('cls' if os.name == 'nt' else 'clear')
             print(renderer.render())
-
-    def place_bonuses(self, count=3, entry=(0, 0), exit=(0, 0)) -> None:
-        self.bonuses = []
-        while len(self.bonuses) < count:
-            rx, ry = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
-            if (rx, ry) != entry and (rx, ry) != exit and (rx, ry) not in self.bonuses:
-                self.bonuses.append((rx, ry))
-
-    def show_path(self, entry, exit, path, animate=True, show=True) -> None:
-        renderer = AsciiRenderer(self, entry, exit)
-
-        if animate:
-            visible_path = set()
-
-            for cell in path:
-                visible_path.add(cell)
-                os.system('cls' if os.name == 'nt' else 'clear')
-                print(renderer.render(path=visible_path, show=show))
-                if show:
-                    time.sleep(0.05)
-        else:
-            os.system('cls' if os.name == 'nt' else 'clear')
-            print(renderer.render(path=set(path), show=show))
-
-

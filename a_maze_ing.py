@@ -27,7 +27,7 @@ if __name__ == "__main__":
             halwasa_mode = data['HALWASA']
 
             maze = MazeGenerator(width, height)
-            maze.generate(animate=animate, entry=entry, exit=exit, perfect_flag=perfect)
+            maze.generate_DFS(animate=animate, entry=entry, exit=exit, perfect_flag=perfect)
 
             theme = 0
             show = True
@@ -69,14 +69,13 @@ if __name__ == "__main__":
                     show = True
                     os.system('cls' if os.name == 'nt' else 'clear')
                     maze = MazeGenerator(width, height)
-                    maze.generate(animate=animate, entry=entry, exit=exit, perfect_flag=perfect)
+                    maze.generate_DFS(animate=animate, entry=entry, exit=exit, perfect_flag=perfect)
                 elif choice == 2:
-
                     if show:
-                        maze.show_path(entry=entry, exit=exit, path=coordinates_path, animate=animate)
+                        Solver.show_path(maze, entry=entry, exit=exit, path=coordinates_path, animate=animate)
                         show = False
                     elif not show:
-                        maze.show_path(entry=entry, exit=exit, path=coordinates_path, animate=animate, show=show)
+                        Solver.show_path(maze, entry=entry, exit=exit, path=coordinates_path, animate=animate, show=show)
                         show = True
                 elif choice == 3:
 
@@ -90,6 +89,7 @@ if __name__ == "__main__":
                 elif choice == 4:
 
                     PlayMode.play(maze=maze, entry=entry, exit=exit, halwasa=halwasa_mode)
+
                 elif choice == 5:
                     os.system('cls' if os.name == 'nt' else 'clear')
                     print("Exiting The Maze Game !")

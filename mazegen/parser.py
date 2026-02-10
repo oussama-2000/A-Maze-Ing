@@ -1,3 +1,6 @@
+from mazegen.coordinates import Coordinates
+
+
 class ConfigParser:
 
     def __init__(self, filepath: str) -> None:
@@ -70,16 +73,23 @@ class ConfigParser:
 
         if w <= 0 or h <= 0:
             raise ValueError("Width And Height Must Be Positive .")
+        if w < 3 or h < 3:
+            raise ValueError("Give Reasonable height and width to make a maze")
 
         if self.config["ENTRY"] == self.config["EXIT"]:
             raise ValueError("Entry and Exit must be different")
 
+        if w >= 9 and h >= 7:
+            if self.config["ENTRY"] in Coordinates.forty_two_cells(self.config["WIDTH"], self.config["HEIGHT"]):
+                raise ValueError("Entry Coordinates Should not located in the 42 block")
+
+            if self.config["EXIT"] in Coordinates.forty_two_cells(self.config["WIDTH"], self.config["HEIGHT"]):
+                raise ValueError("Exit Coordinates Should not located in the 42 block")
         try:
             entry_x, entry_y = self.config["ENTRY"]
             exit_x, exit_y = self.config["EXIT"]
         except ValueError:
             raise ValueError("Entry and Exit Coordinates Should be Exactly two dimentions")
-
 
         if (entry_x < 0) or (entry_x >= w) or (entry_y < 0) or (entry_y >= h):
             raise ValueError(f"Entry {entry_x},{entry_y} is outside The {w}x{h} grid !")

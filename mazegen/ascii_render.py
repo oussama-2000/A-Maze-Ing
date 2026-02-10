@@ -3,7 +3,7 @@ from mazegen.coordinates import Coordinates
 
 class AsciiRenderer:
 
-    def __init__(self, maze, entry=None, exit=None):
+    def __init__(self, maze, entry=None, exit=None) -> None:
         self.maze = maze
         self.entry = entry
         self.exit = exit
@@ -98,13 +98,6 @@ class AsciiRenderer:
         # 1. top border
         output = TL + (h_seg + J_TOP) * (width - 1) + h_seg + TR + "\n"
 
-        # arrows = {
-        #     'left': ' \u2190 ',
-        #     'right': ' \u2192 ',
-        #     'up': ' \u2191 ',
-        #     'down': ' \u2193 '
-        # }
-
         for y in range(height):
             row_str = V_WALL
             for x in range(width):
@@ -126,7 +119,6 @@ class AsciiRenderer:
                 else:
                     body = "   "
                 if (x, y) in Coordinates.forty_two_cells(width, height) and width >= 9 and height >= 7:
-                    # body = "\033[32m\u2588\u2588\u2588\033[0m"
                     body = f" \033[0;{origin_theme['cells_42']}m\u2588\033[0m "
 
                 # East Wall:

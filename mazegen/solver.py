@@ -1,5 +1,8 @@
 from collections import deque
 from mazegen.coordinates import Coordinates
+from mazegen.ascii_render import AsciiRenderer
+import os
+import time
 
 
 class Solver:
@@ -62,3 +65,19 @@ class Solver:
             y += dy
             cell_pos.append((x, y))
         return cell_pos
+
+    def show_path(maze, entry, exit, path, animate=True, show=True) -> None:
+        renderer = AsciiRenderer(maze, entry, exit)
+
+        if animate:
+            visible_path = set()
+
+            for cell in path:
+                visible_path.add(cell)
+                os.system('cls' if os.name == 'nt' else 'clear')
+                print(renderer.render(path=visible_path, show=show))
+                if show:
+                    time.sleep(0.05)
+        else:
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print(renderer.render(path=set(path), show=show))
