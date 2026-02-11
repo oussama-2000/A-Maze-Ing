@@ -1,3 +1,6 @@
+from typing import List, Tuple
+
+
 class Coordinates:
 
     directions = {
@@ -13,10 +16,11 @@ class Coordinates:
         'W': 'E',
     }
 
+    @staticmethod
     def forty_two_cells(
             maze_width: int,
             maze_height: int
-                            ) -> list:
+                            ) -> List[Tuple]:
         cells = [
             ((maze_width // 2) + 2, (maze_height // 2) - 2),
             ((maze_width // 2) + 1, (maze_height // 2) - 2),

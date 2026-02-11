@@ -1,12 +1,21 @@
 from collections import deque
-from maze.coordinates import Coordinates
-from maze.ascii_render import AsciiRenderer
+from mazegen.coordinates import Coordinates
+from mazegen.ascii_render import AsciiRenderer
+from typing import List, Tuple, Dict, TYPE_CHECKING
+if TYPE_CHECKING:
+    from mazegen.generator import MazeGenerator
 import os
 import time
 
 
 class Solver:
-    def solve_bfs(maze, entry, exit) -> list:
+
+    @staticmethod
+    def solve_bfs(
+                  maze: "MazeGenerator",
+                  entry: Tuple[int, int],
+                  exit: Tuple[int, int]
+                  ) -> List:
         start = entry
         goal = exit
 
@@ -26,7 +35,7 @@ class Solver:
             # iterating directions to expand neighbors
             for direction, (dx, dy) in Coordinates.directions.items():
 
-                if cell.walls[direction]:
+                if cell and cell.walls[direction]:
                     continue  # wall is closed
 
                 # compute neighbor coordinates
@@ -41,9 +50,20 @@ class Solver:
                     queue.append((nx, ny))
                     # add it to queue for next exploration
 
-        return Solver.generate_path(maze, parent, entry, exit)
+        return Solver.generate_path(
+                            maze,
+                            parent,
+                            entry,
+                            exit
+                            )
 
-    def generate_path(maze, parent, entry, exit) -> list:
+    @staticmethod
+    def generate_path(
+                maze: "MazeGenerator",
+                parent: Dict,
+                entry: Tuple[int, int],
+                exit: Tuple[int, int]
+                ) -> List:
         path = []
         current = exit
 
@@ -55,7 +75,12 @@ class Solver:
         path.reverse()
         return path
 
-    def path_to_cells(maze, entry, path) -> list:
+    @staticmethod
+    def path_to_cells(
+                entry: Tuple[int, int],
+                path: List
+                ) -> List:
+
         x, y = entry
         cell_pos = [(x, y)]
 
@@ -66,7 +91,16 @@ class Solver:
             cell_pos.append((x, y))
         return cell_pos
 
-    def show_path(maze, entry, exit, path, animate=True, show=True) -> None:
+    @staticmethod
+    def show_path(
+            maze: "MazeGenerator",
+            entry: Tuple[int, int],
+            exit: Tuple[int, int],
+            path: List,
+            animate: bool = True,
+            show: bool = True
+            ) -> None:
+
         renderer = AsciiRenderer(maze, entry, exit)
 
         if animate:

@@ -1,9 +1,9 @@
-from maze.solver import Solver
-from maze.generator import MazeGenerator
-from maze.encoder import HexEncoder
-from maze.ascii_render import AsciiRenderer
-from maze.parser import ConfigParser
-from maze.play import PlayMode
+from mazegen.solver import Solver
+from mazegen.generator import MazeGenerator
+from mazegen.encoder import HexEncoder
+from mazegen.ascii_render import AsciiRenderer
+from mazegen.parser import ConfigParser
+from mazegen.play import PlayMode
 from sys import argv
 import os
 
@@ -30,25 +30,44 @@ if __name__ == "__main__":
             halwasa_mode = data['HALWASA']
 
             maze = MazeGenerator(width, height)
-            maze.generate_DFS(animate=animate, entry=entry, exit=exit, perfect_flag=perfect)
+            maze.generate_DFS(
+                animate=animate,
+                entry=entry,
+                exit=exit,
+                perfect_flag=perfect
+                )
 
             theme = 0
             show = True
 
             while True:
 
-                directions_path = Solver.solve_bfs(maze=maze, entry=entry, exit=exit)
+                directions_path = Solver.solve_bfs(
+                                            maze=maze,
+                                            entry=entry,
+                                            exit=exit
+                                            )
                 out_path = ""
                 for i in directions_path:
                     out_path += i
 
-                encoder = HexEncoder(maze.grid, width=width, height=height, entry=entry, exit=exit, path=out_path)
+                encoder = HexEncoder(
+                            maze.grid,
+                            width=width,
+                            height=height,
+                            entry=entry,
+                            exit=exit,
+                            path=out_path
+                            )
                 output = encoder.encode()
 
                 with open(output_file, "w") as file:
                     file.write(output)
 
-                coordinates_path = Solver.path_to_cells(maze=maze, entry=entry, path=directions_path)
+                coordinates_path = Solver.path_to_cells(
+                                            entry=entry,
+                                            path=directions_path
+                                            )
 
                 print("="*10, "A-Maze-Ing", "="*10)
                 options = {
@@ -72,13 +91,30 @@ if __name__ == "__main__":
                     show = True
                     os.system('cls' if os.name == 'nt' else 'clear')
                     maze = MazeGenerator(width, height)
-                    maze.generate_DFS(animate=animate, entry=entry, exit=exit, perfect_flag=perfect)
+                    maze.generate_DFS(
+                            animate=animate,
+                            entry=entry,
+                            exit=exit,
+                            perfect_flag=perfect
+                            )
                 elif choice == 2:
                     if show:
-                        Solver.show_path(maze, entry=entry, exit=exit, path=coordinates_path, animate=animate)
+                        Solver.show_path(maze,
+                                         entry=entry,
+                                         exit=exit,
+                                         path=coordinates_path,
+                                         animate=animate
+                                         )
                         show = False
                     elif not show:
-                        Solver.show_path(maze, entry=entry, exit=exit, path=coordinates_path, animate=animate, show=show)
+                        Solver.show_path(
+                                maze,
+                                entry=entry,
+                                exit=exit,
+                                path=coordinates_path,
+                                animate=animate,
+                                show=show
+                                )
                         show = True
                 elif choice == 3:
 
@@ -91,7 +127,12 @@ if __name__ == "__main__":
 
                 elif choice == 4:
 
-                    PlayMode.play(maze=maze, entry=entry, exit=exit, halwasa=halwasa_mode)
+                    PlayMode.play(
+                        maze=maze,
+                        entry=entry,
+                        exit=exit,
+                        halwasa=halwasa_mode
+                        )
 
                 elif choice == 5:
                     os.system('cls' if os.name == 'nt' else 'clear')

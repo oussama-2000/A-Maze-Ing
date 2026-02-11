@@ -1,9 +1,10 @@
 import random
 import time
 import os
-from maze.cell import Cell
-from maze.coordinates import Coordinates
-from maze.ascii_render import AsciiRenderer
+from mazegen.cell import Cell
+from mazegen.coordinates import Coordinates
+from mazegen.ascii_render import AsciiRenderer
+from typing import List, Optional, Tuple
 
 
 class MazeGenerator:
@@ -21,7 +22,8 @@ class MazeGenerator:
 
         self.width = width
         self.height = height
-        self.grid = self.create_grid()
+        self.grid: List[List[Cell]] = self.create_grid()
+        self.bonuses: List = []
 
     def create_grid(self) -> list:
         """creates the maze grid (x, y)"""
@@ -39,7 +41,7 @@ class MazeGenerator:
         """
         return 0 <= x < self.width and 0 <= y < self.height
 
-    def get_cell(self, x: int, y: int):
+    def get_cell(self, x: int, y: int) -> Optional[Cell]:
         """
         Retrieves the Cell object at the given (x, y) coordinates.
         """
@@ -47,7 +49,9 @@ class MazeGenerator:
             return None
         return self.grid[y][x]
 
-    def carve(self, x1, y1, x2, y2, direction) -> None:
+    def carve(self, x1: int, y1: int,
+              x2: int, y2: int, direction: str
+              ) -> None:
 
         current = self.get_cell(x1, y1)
         neighbor = self.get_cell(x2, y2)
@@ -59,15 +63,16 @@ class MazeGenerator:
             neighbor.walls[opp] = False
 
     def generate_DFS(self,
-                     animate=False,
-                     entry=None,
-                     exit=None,
-                     perfect_flag=False
+                     entry: Tuple[int, int],
+                     exit: Tuple[int, int],
+                     animate: bool = False,
+                     perfect_flag: bool = False
                      ) -> None:
 
         # when the 42 block should shows up
         if self.width >= 9 and self.height >= 7:
-            blocked_positions = Coordinates.forty_two_cells(self.width, self.height)
+            blocked_positions = \
+                Coordinates.forty_two_cells(self.width, self.height)
             for bx, by in blocked_positions:
                 blocked_cell = self.get_cell(bx, by)
                 if blocked_cell:
@@ -95,7 +100,8 @@ class MazeGenerator:
                 nx, ny = x + dx, y + dy
                 if self.in_bounds(nx, ny):
                     neighbor = self.get_cell(nx, ny)
-                    if neighbor and not neighbor.visited and not neighbor.blocked:
+                    if neighbor and not neighbor.visited and\
+                            not neighbor.blocked:
                         unvisited_neighbors.append((direction, nx, ny))
 
             if unvisited_neighbors:
@@ -109,7 +115,8 @@ class MazeGenerator:
                     time.sleep(0.01)
 
                 neighbor_cell = self.get_cell(next_x, next_y)
-                neighbor_cell.visited = True
+                if neighbor_cell:
+                    neighbor_cell.visited = True
                 stack.append((next_x, next_y))
             else:
                 stack.pop()
@@ -117,15 +124,18 @@ class MazeGenerator:
         if not perfect_flag:
             extra_walls_to_break = int((self.width * self.height) / 10)
             for _ in range(extra_walls_to_break):
-                rx, ry = random.randint(0, self.width-1), random.randint(0, self.height-1)
+                rx, ry = random.randint(0, self.width-1), \
+                    random.randint(0, self.height-1)
                 random_dir = random.choice(list(Coordinates.directions.keys()))
                 dx, dy = Coordinates.directions[random_dir]
                 nx, ny = rx + dx, ry + dy
                 # to make sure if it's owned by 42 block
                 curent_cell = self.get_cell(rx, ry)
                 next_cell = self.get_cell(nx, ny)
-                if self.in_bounds(nx, ny) and not curent_cell.blocked and not next_cell.blocked:
-                    self.carve(rx, ry, nx, ny, random_dir)
+                if curent_cell and next_cell:
+                    if self.in_bounds(nx, ny) and not curent_cell.blocked and\
+                            not next_cell.blocked:
+                        self.carve(rx, ry, nx, ny, random_dir)
 
         if not animate:
             os.system('cls' if os.name == 'nt' else 'clear')
