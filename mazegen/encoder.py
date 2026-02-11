@@ -2,6 +2,9 @@ from typing import List, Tuple
 
 
 class HexEncoder:
+    """
+    Represent the maze hexadecimal output
+    """
 
     bit_map = {'N': 1, 'E': 2, 'S': 4, 'W': 8}
     hex_chars = "0123456789ABCDEF"
@@ -14,7 +17,7 @@ class HexEncoder:
                  exit: Tuple[int, int],
                  path: str
                  ) -> None:
-        """Initialize with the generated maze grid."""
+
         self.grid = grid
         self.width = width
         self.height = height
@@ -23,6 +26,12 @@ class HexEncoder:
         self.path = path
 
     def encode(self) -> str:
+        """
+        Docstring for encode
+        the encoder method
+        :return: it return the maze hexadicimal output
+        :rtype: str
+        """
         hex_grid = []
         for y in range(0, self.height):
             row_str = ""

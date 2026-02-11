@@ -9,13 +9,27 @@ if TYPE_CHECKING:
 
 
 class PlayMode:
-
+    """
+    represent the bluprint of maze play mode
+    """
     @staticmethod
     def place_bonuses(count: int,
                       maze: "MazeGenerator",
                       entry: Tuple[int, int],
                       exit: Tuple[int, int]
                       ) -> None:
+        """
+        Docstring for place_bonuses
+        this method responsible for bonuses box placement
+        :param count: how many box
+        :type count: int
+        :param maze: the maze object
+        :type maze: "MazeGenerator"
+        :param entry: the maze entry
+        :type entry: Tuple[int, int]
+        :param exit: the maze exit
+        :type exit: Tuple[int, int]
+        """
 
         while len(maze.bonuses) < count:
             rx, ry = random.randint(0, maze.width - 1), \
@@ -31,6 +45,29 @@ class PlayMode:
              exit: Tuple[int, int],
              halwasa: bool = False
              ) -> None:
+        """
+        Docstring for play
+        the play method represent the play mode dashbord
+        where the player can:
+            move with keys:
+                up: w
+                down: s
+                right: d
+                left: a
+            use cheet codes
+            enter: 'exit' to exit
+        :param maze: the maze object
+        :type maze: "MazeGenerator"
+        :param entry: the maze entry
+        :type entry: Tuple[int, int]
+        :param exit: the maze exit
+        :type exit: Tuple[int, int]
+        :param halwasa: flage for halwasa mode
+            halwasa mode makes the maze themes changing
+            when moving like a bar light
+        :type halwasa: bool
+        """
+
         # os.system('cls' if os.name == 'nt' else 'clear')
         # intor = "\033[1;31mHury Up Dexter Tonight is The Night !\033[0m"
 

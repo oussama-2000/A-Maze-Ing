@@ -9,13 +9,14 @@ from typing import List, Optional, Tuple
 
 class MazeGenerator:
     """
+        The main Class that responsible for the maze generation
         Instantiation :
             instance_name = MazeGenerator(width, height)
             for example:
                 maze = MazeGenerator(15, 17)
         Access :
-            To access a maze solution you can do:
-                solution_path = Solver.solve_bfs(instance_name, entry, exit)
+            To access a maze grid you can do:
+                maze_grid = MazeGenerator.grid()
 
     """
     def __init__(self, width: int, height: int) -> None:
@@ -26,7 +27,12 @@ class MazeGenerator:
         self.bonuses: List = []
 
     def create_grid(self) -> list:
-        """creates the maze grid (x, y)"""
+        """
+        Docstring for create_grid
+        creates the maze grid (x, y)
+        :return: grid[x,y] rows and columns
+        :rtype: list
+        """
         grid = []
         for _ in range(self.height):
             row = []
@@ -52,7 +58,21 @@ class MazeGenerator:
     def carve(self, x1: int, y1: int,
               x2: int, y2: int, direction: str
               ) -> None:
-
+        """
+        Docstring for carve
+        this helper function used to open the cell walls
+        by setting the walls state to false
+        :param x1: curent position x
+        :type x1: int
+        :param y1: curent position y
+        :type y1: int
+        :param x2: next position x
+        :type x2: int
+        :param y2: next position y
+        :type y2: int
+        :param direction: the direction of carving
+        :type direction: str
+        """
         current = self.get_cell(x1, y1)
         neighbor = self.get_cell(x2, y2)
 
@@ -68,6 +88,20 @@ class MazeGenerator:
                      animate: bool = False,
                      perfect_flag: bool = False
                      ) -> None:
+        """
+        Docstring for generate_DFS
+        the maze generation method that uses the carve method
+          to carve all maze cells to make pasage
+        :param entry: the maze entry (carving start)
+        :type entry: Tuple[int, int]
+        :param exit: the maze exit (carving end)
+        :type exit: Tuple[int, int]
+        :param animate: flage for animation when carving
+        :type animate: bool
+        :param perfect_flag: flage to make sure that the maze
+          hase just one solution path
+        :type perfect_flag: bool
+        """
 
         # when the 42 block should shows up
         if self.width >= 9 and self.height >= 7:

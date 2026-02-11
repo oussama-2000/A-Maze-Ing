@@ -9,13 +9,30 @@ import time
 
 
 class Solver:
-
+    """
+    this class represent the maze solve
+    for generate the solution path
+    """
     @staticmethod
     def solve_bfs(
                   maze: "MazeGenerator",
                   entry: Tuple[int, int],
                   exit: Tuple[int, int]
                   ) -> List:
+        """
+        Docstring for solve_bfs
+        the method that responsible for solve the maze using BFS algorithm
+        :param maze: the maze object
+        :type maze: "MazeGenerator"
+        :param entry: the maze entry
+        :type entry: Tuple[int, int]
+        :param exit: the maze exit
+        :type exit: Tuple[int, int]
+        :return: it returns a list of directions that solve the maze
+            using the helper function generate_path
+        :rtype: List
+        """
+
         start = entry
         goal = exit
 
@@ -51,7 +68,6 @@ class Solver:
                     # add it to queue for next exploration
 
         return Solver.generate_path(
-                            maze,
                             parent,
                             entry,
                             exit
@@ -59,11 +75,24 @@ class Solver:
 
     @staticmethod
     def generate_path(
-                maze: "MazeGenerator",
                 parent: Dict,
                 entry: Tuple[int, int],
                 exit: Tuple[int, int]
                 ) -> List:
+        """
+        Docstring for generate_path
+        helper function for extract directions from the given dictionary
+        :param parent: dictionary as this form:
+         {'reached cell(x, y)' : ('from which cell(x, y), 'wich direction') }
+        :type parent: Dict
+        :param entry: maze entry
+        :type entry: Tuple[int, int]
+        :param exit: maze exit
+        :type exit: Tuple[int, int]
+        :return: it return a list of the solution directions
+        :rtype: List
+        """
+
         path = []
         current = exit
 
@@ -80,6 +109,15 @@ class Solver:
                 entry: Tuple[int, int],
                 path: List
                 ) -> List:
+        """
+        Docstring for path_to_cells
+        this method used to return solution directions into
+        reel maze coordinates to move
+        :param entry: maze entry
+        :type entry: Tuple[int, int]
+        :param path: list of solution directions
+        :type path: List
+        """
 
         x, y = entry
         cell_pos = [(x, y)]
@@ -100,6 +138,22 @@ class Solver:
             animate: bool = True,
             show: bool = True
             ) -> None:
+        """
+        Docstring for show_path
+        shows the solution path on the maze using the AsciiRender class
+        :param maze: the maze object
+        :type maze: "MazeGenerator"
+        :param entry: the maze entry
+        :type entry: Tuple[int, int]
+        :param exit: the maze exit
+        :type exit: Tuple[int, int]
+        :param path: the solution path coordinates
+        :type path: List
+        :param animate: flage for animate when showing the path or not
+        :type animate: bool
+        :param show: show or hide
+        :type show: bool
+        """
 
         renderer = AsciiRenderer(maze, entry, exit)
 

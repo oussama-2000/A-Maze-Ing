@@ -2,11 +2,16 @@ from mazegen.coordinates import Coordinates
 from typing import Tuple, List, Any, Optional, Set, TYPE_CHECKING
 if TYPE_CHECKING:
     from mazegen.generator import MazeGenerator
-    # to avoid circular import TYPE_CHECKING false at runtime
+    # to avoid circular import; TYPE_CHECKING false at runtime
 
 
 class AsciiRenderer:
-
+    """
+        This class responsible for the maze visualisation
+        Including themes shapes ...
+        you can use it by accessing the render method:
+        rendering = AsciiRenderer.render(parameters)
+    """
     def __init__(self,
                  maze: "MazeGenerator",
                  entry: Tuple[int, int],
@@ -25,7 +30,24 @@ class AsciiRenderer:
                rotate_theme: bool = False,
                show: bool = True
                ) -> str:
+        """
+        Docstring for render
 
+        :param player_pos: player position
+        :type player_pos: Optional[Tuple[int, int]]
+        :param visited_trail: cells that visited by player
+        :type visited_trail: Optional[List[Tuple[int, int]]]
+        :param path: the solution path
+        :type path: Optional[Set[Any]]
+        :param theme: the maze theme
+        :type theme: Optional[int]
+        :param rotate_theme: flage of rotating the maze themes
+        :type rotate_theme: bool
+        :param show: flage of showing the solution path / or hide it
+        :type show: bool
+        :return: it returns the maze ascii representation
+        :rtype: str
+        """
         colors = [31, 32, 33, 34, 35, 36, 39, 93]
 
         origin_theme = {

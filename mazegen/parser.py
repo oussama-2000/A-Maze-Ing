@@ -3,6 +3,10 @@ from mazegen.coordinates import Coordinates
 
 
 class ConfigParser:
+    """
+    Docstring for ConfigParser
+    Class that responsible for config file parsing
+    """
 
     def __init__(self, filepath: str) -> None:
 
@@ -19,6 +23,12 @@ class ConfigParser:
         }
 
     def parse(self) -> Optional[Dict]:
+        """
+        Docstring for parse
+        the parsing method ,parses the config file entries
+        :return: it returns a dict of config data
+        :rtype: Dict | None
+        """
 
         keys_count = 0
         try:
@@ -57,6 +67,14 @@ class ConfigParser:
         return None
 
     def assign_value(self, key: str, value: str) -> None:
+        """
+        Docstring for assign_value
+        helper method to set set values
+        :param key: entry key
+        :type key: str
+        :param value: entry value
+        :type value: str
+        """
         try:
 
             if key in ["WIDTH", "HEIGHT"]:
@@ -76,6 +94,12 @@ class ConfigParser:
             raise ValueError(f"Could Not Parse '{value} for key '{key}")
 
     def validate(self) -> bool:
+        """
+        Docstring for validate
+        helper method to validate entries
+        :return: valid or not
+        :rtype: bool
+        """
         w = self.config["WIDTH"]
         h = self.config["HEIGHT"]
 
