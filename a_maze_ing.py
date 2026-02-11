@@ -69,17 +69,35 @@ if __name__ == "__main__":
                                             path=directions_path
                                             )
 
-                print("="*10, "A-Maze-Ing", "="*10)
+                # print("="*10, "A-Maze-Ing", "="*10)
+                print(" █████╗       ███╗   ███╗ █████╗"
+                      " ███████╗███████╗      ██╗███╗  ██╗ ██████╗ ")
+                print("██╔══██╗      ████╗ ████║██╔══██╗"
+                      "╚════██║██╔════╝      ██║████╗ ██║██╔════╝ ")
+                print("███████║█████╗██╔████╔██║███████║"
+                      "  ███╔═╝█████╗  █████╗██║██╔██╗██║██║  ██╗ ")
+                print("██╔══██║╚════╝██║╚██╔╝██║██╔══██║"
+                      "██╔══╝  ██╔══╝  ╚════╝██║██║╚████║██║  ╚██╗")
+                print("██║  ██║      ██║ ╚═╝ ██║██║  ██║"
+                      "███████╗███████╗      ██║██║ ╚███║╚██████╔╝")
+                print("╚═╝  ╚═╝      ╚═╝     ╚═╝╚═╝  ╚═╝"
+                      "╚══════╝╚══════╝      ╚═╝╚═╝  ╚══╝ ╚═════╝ ")
+                print("\n")
                 options = {
-                    1: 're-generate a new maze',
+                    1: 're-generate a new maze           ',
                     2: 'show/hide path from entry to exit',
-                    3: 'rotate maze colors',
-                    4: 'player mode',
-                    5: 'quit',
+                    3: 'rotate maze colors               ',
+                    4: 'player mode                      ',
+                    5: 'quit                             '
                 }
 
                 for key, option in options.items():
-                    print(f'{key}. {option}')
+                    print(f"|                    {key}. {option}"
+                          "                    |")
+                print("|                                        "
+                      "                                    |")
+                print("-"*78)
+
                 try:
                     choice = int(input("Choice: "))
 

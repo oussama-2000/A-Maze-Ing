@@ -133,7 +133,12 @@ class PlayMode:
                     time.sleep(0.3)
                     hearts.pop()
                     if not hearts:
-                        print("You've Been Caught By Mimai Metro !")
+                        print("\033[91m You've Been Caught By Mimai Metro !"
+                              "\033[0m")
+                        time.sleep(1.8)
+                        os.system('cls' if os.name == 'nt' else 'clear')
+                        maze.bonuses = []  # to remove bounuses
+                        print(renderer.render(rotate_theme=True, theme=theme))
                         break
                     time.sleep(0.5)
                 new_pos = (px, py)
