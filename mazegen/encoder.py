@@ -1,15 +1,19 @@
-from typing import Dict, Tuple
+from typing import List, Tuple
 
 
 class HexEncoder:
 
-    bit_map: Dict[str, int] = {'N': 1, 'E': 2, 'S': 4, 'W': 8}
-    hex_chars: str = "0123456789ABCDEF"
+    bit_map = {'N': 1, 'E': 2, 'S': 4, 'W': 8}
+    hex_chars = "0123456789ABCDEF"
 
-    def __init__(self, grid,
-                 width: int, height: int,
+    def __init__(self,
+                 grid: List[List],
+                 width: int,
+                 height: int,
                  entry: Tuple[int, int],
-                 exit: Tuple[int, int], path: str = "") -> None:
+                 exit: Tuple[int, int],
+                 path: str
+                 ) -> None:
         """Initialize with the generated maze grid."""
         self.grid = grid
         self.width = width

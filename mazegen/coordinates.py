@@ -1,15 +1,15 @@
-from typing import Tuple, Dict, List
+from typing import List, Tuple
 
 
 class Coordinates:
 
-    directions: Dict[str, Tuple[int, int]] = {
+    directions = {
         'N': (0, -1),
         'S': (0, 1),
         'E': (1, 0),
         'W': (-1, 0),
     }
-    opposite: Dict[str, str] = {
+    opposite = {
         'N': 'S',
         'S': 'N',
         'E': 'W',
@@ -20,7 +20,7 @@ class Coordinates:
     def forty_two_cells(
             maze_width: int,
             maze_height: int
-                            ) -> List[Tuple[int, int]]:
+                            ) -> List[Tuple]:
         cells = [
             ((maze_width // 2) + 2, (maze_height // 2) - 2),
             ((maze_width // 2) + 1, (maze_height // 2) - 2),

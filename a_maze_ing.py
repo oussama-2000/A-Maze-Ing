@@ -12,6 +12,9 @@ if __name__ == "__main__":
     try:
         if len(argv) < 2:
             raise ValueError("Error: You Sould Provide The Config File")
+        if len(argv) > 2:
+            raise ValueError("Error: No More Arguments More Than Program "
+                             "and Config file")
         config_file = argv[1]
         configration = ConfigParser(config_file)
         data = configration.parse()
@@ -27,39 +30,84 @@ if __name__ == "__main__":
             halwasa_mode = data['HALWASA']
 
             maze = MazeGenerator(width, height)
-            maze.generate_DFS(animate=animate, entry=entry, exit=exit, perfect_flag=perfect)
+            maze.generate_DFS(
+                animate=animate,
+                entry=entry,
+                exit=exit,
+                perfect_flag=perfect
+                )
 
             theme = 0
             show = True
 
             while True:
 
-                directions_path = Solver.solve_bfs(maze=maze, entry=entry, exit=exit)
+                directions_path = Solver.solve_bfs(
+                                            maze=maze,
+                                            entry=entry,
+                                            exit=exit
+                                            )
                 out_path = ""
                 for i in directions_path:
                     out_path += i
 
-                encoder = HexEncoder(maze.grid, width=width, height=height, entry=entry, exit=exit, path=out_path)
+                encoder = HexEncoder(
+                            maze.grid,
+                            width=width,
+                            height=height,
+                            entry=entry,
+                            exit=exit,
+                            path=out_path
+                            )
                 output = encoder.encode()
 
                 with open(output_file, "w") as file:
                     file.write(output)
 
-                coordinates_path = Solver.path_to_cells(maze=maze, entry=entry, path=directions_path)
+                coordinates_path = Solver.path_to_cells(
+                                            entry=entry,
+                                            path=directions_path
+                                            )
 
-                print("="*10, "A-Maze-Ing", "="*10)
+                # Color codes
+                RED: str = "\033[31m"
+                BOLD: str = "\033[1m"
+                RESET: str = "\033[0m"
+                GREEN: str = "\033[32m"
+
+                print(f"{BOLD}{RED}Maze Seed : "
+                      f"{maze.seed}{RESET} \n")
+                # print("="*10, "A-Maze-Ing", "="*10)
+                print(" █████╗       ███╗   ███╗ █████╗"
+                      " ███████╗███████╗      ██╗███╗  ██╗ ██████╗ ")
+                print("██╔══██╗      ████╗ ████║██╔══██╗"
+                      "╚════██║██╔════╝      ██║████╗ ██║██╔════╝ ")
+                print("███████║█████╗██╔████╔██║███████║"
+                      "  ███╔═╝█████╗  █████╗██║██╔██╗██║██║  ██╗ ")
+                print("██╔══██║╚════╝██║╚██╔╝██║██╔══██║"
+                      "██╔══╝  ██╔══╝  ╚════╝██║██║╚████║██║  ╚██╗")
+                print("██║  ██║      ██║ ╚═╝ ██║██║  ██║"
+                      "███████╗███████╗      ██║██║ ╚███║╚██████╔╝")
+                print("╚═╝  ╚═╝      ╚═╝     ╚═╝╚═╝  ╚═╝"
+                      "╚══════╝╚══════╝      ╚═╝╚═╝  ╚══╝ ╚═════╝ ")
+                print("\n")
                 options = {
-                    1: 're-generate a new maze',
+                    1: 're-generate a new maze           ',
                     2: 'show/hide path from entry to exit',
-                    3: 'rotate maze colors',
-                    4: 'player mode',
-                    5: 'quit',
+                    3: 'rotate maze colors               ',
+                    4: 'player mode                      ',
+                    5: 'quit                             '
                 }
 
                 for key, option in options.items():
-                    print(f'{key}. {option}')
+                    print(f"{BOLD}{GREEN}|                    {key}. {option}"
+                          f"                    {BOLD}{GREEN}|")
+                print(f"{BOLD}{GREEN}|                                        "
+                      f"                                    |{RESET}")
+                print(f"{BOLD}{GREEN}{'-' * 78}{RESET}")
+
                 try:
-                    choice = int(input("Choice: "))
+                    choice = int(input(f"{BOLD}Choice: {RESET}"))
 
                     if choice not in options.keys():
                         raise ValueError
@@ -69,13 +117,30 @@ if __name__ == "__main__":
                     show = True
                     os.system('cls' if os.name == 'nt' else 'clear')
                     maze = MazeGenerator(width, height)
-                    maze.generate_DFS(animate=animate, entry=entry, exit=exit, perfect_flag=perfect)
+                    maze.generate_DFS(
+                            animate=animate,
+                            entry=entry,
+                            exit=exit,
+                            perfect_flag=perfect
+                            )
                 elif choice == 2:
                     if show:
-                        Solver.show_path(maze, entry=entry, exit=exit, path=coordinates_path, animate=animate)
+                        Solver.show_path(maze,
+                                         entry=entry,
+                                         exit=exit,
+                                         path=coordinates_path,
+                                         animate=animate
+                                         )
                         show = False
                     elif not show:
-                        Solver.show_path(maze, entry=entry, exit=exit, path=coordinates_path, animate=animate, show=show)
+                        Solver.show_path(
+                                maze,
+                                entry=entry,
+                                exit=exit,
+                                path=coordinates_path,
+                                animate=animate,
+                                show=show
+                                )
                         show = True
                 elif choice == 3:
 
@@ -88,7 +153,12 @@ if __name__ == "__main__":
 
                 elif choice == 4:
 
-                    PlayMode.play(maze=maze, entry=entry, exit=exit, halwasa=halwasa_mode)
+                    PlayMode.play(
+                        maze=maze,
+                        entry=entry,
+                        exit=exit,
+                        halwasa=halwasa_mode
+                        )
 
                 elif choice == 5:
                     os.system('cls' if os.name == 'nt' else 'clear')

@@ -1,23 +1,28 @@
 from mazegen.coordinates import Coordinates
-from typing import Tuple, Optional, List
-from mazegen.generator import MazeGenerator
+from typing import Tuple, List, Any, Optional, Set, TYPE_CHECKING
+if TYPE_CHECKING:
+    from mazegen.generator import MazeGenerator
+    # to avoid circular import TYPE_CHECKING false at runtime
 
 
 class AsciiRenderer:
 
-    def __init__(self, maze: MazeGenerator,
-                 entry: Optional[Tuple[int, int]] = None,
-                 exit: Optional[Tuple[int, int]] = None) -> None:
-        self.maze: MazeGenerator = maze
-        self.entry: Optional[Tuple[int, int]] = entry
-        self.exit: Optional[Tuple[int, int]] = exit
+    def __init__(self,
+                 maze: "MazeGenerator",
+                 entry: Tuple[int, int],
+                 exit: Tuple[int, int]
+                 ) -> None:
+
+        self.maze = maze
+        self.entry = entry
+        self.exit = exit
 
     def render(self,
                player_pos: Optional[Tuple[int, int]] = None,
                visited_trail: Optional[List[Tuple[int, int]]] = None,
-               path: Optional[List[Tuple[int, int]]] = None,
-               rotate_theme: bool = False,
+               path: Optional[Set[Any]] = None,
                theme: Optional[int] = None,
+               rotate_theme: bool = False,
                show: bool = True
                ) -> str:
 
@@ -29,7 +34,7 @@ class AsciiRenderer:
             'player': colors[7],
             'entry': colors[6],
             'target': colors[3],
-            'path': colors[2],
+            'path': colors[4],
             'bonuses': colors[5],
             'visited_cells': colors[2],
             'cells_42': colors[6],
@@ -113,22 +118,25 @@ class AsciiRenderer:
             row_str = V_WALL
             for x in range(width):
                 if (x, y) == player_pos:
-                    body = " \033[1;"
-                    f"{origin_theme['player']}m\U0001fbb2\033[0m "
+                    body = " "\
+                        f"\033[1;{origin_theme['player']}m\U0001fbb2\033[0m"\
+                        " "
                 elif (x, y) == self.entry:
-                    body = " \033[1;"
-                    f"{origin_theme['entry']}m\U0001f3da\033[0m "
+                    body = " "\
+                        f"\033[1;{origin_theme['entry']}m\U0001f3da\033[0m"\
+                        " "
                 elif (x, y) == self.exit:
-                    body = "\033[1;"
-                    f"{origin_theme['target']}m\U0001f46d\033[0m "
-                elif hasattr(self.maze, 'bonuses'):
-                    val = (x, y) in self.maze.bonuses
-                    if val:
-                        body = " \033[0;"
-                        f"{origin_theme['bonuses']}m\U0001fbc4\033[0m "
+                    body = f"\033[1;\
+                        {origin_theme['target']}m\U0001f46d\033[0m "
+                elif self.maze.bonuses and \
+                        (x, y) in self.maze.bonuses:
+                    body = " "\
+                        f"\033[0;{origin_theme['bonuses']}m\U0001fbc4\033[0m"\
+                        " "
                 elif visited_trail and (x, y) in visited_trail:
-                    body = f" \033[{origin_theme['visited_cells']}"
-                    "m\u25aa\033[0m "
+                    body = " "\
+                        f"\033[{origin_theme['visited_cells']}m\u25aa\033[0m"\
+                        " "
                 elif path and (x, y) in path:
                     if show:
                         body = f" \033[{origin_theme['path']}m\u25aa\033[0m "
@@ -136,19 +144,14 @@ class AsciiRenderer:
                         body = "   "
                 else:
                     body = "   "
-                if (x, y) in Coordinates.forty_two_cells(width, height):
-                    if width >= 9 and height >= 7:
-                        body = f" \033[0;{origin_theme['cells_42']}"
-                        "m\u2588\033[0m "
+                if (x, y) in Coordinates.forty_two_cells(width, height) and \
+                        width >= 9 and height >= 7:
+                    body = f" \033[0;{origin_theme['cells_42']}m\u2588\033[0m "
 
+                cell = self.maze.get_cell(x, y)
                 # East Wall:
-                wall_char: str = " "
-                if x == width - 1:
-                    wall_char = V_WALL
-                else:
-                    cell = self.maze.get_cell(x, y)
-                    if cell and cell.walls["E"]:
-                        wall_char = V_WALL
+                wall_char = V_WALL if (cell and cell.walls["E"]) or \
+                    x == width - 1 else " "
                 row_str += body + wall_char
             output += row_str + "\n"
 
@@ -157,12 +160,10 @@ class AsciiRenderer:
                 row_str = J_LEFT
                 for x in range(width):
 
-                    wall: str = "   "
-
                     cell = self.maze.get_cell(x, y)
-                    if cell:
-                        if cell.walls["S"]:
-                            wall = h_seg
+
+                    wall = h_seg if (cell and cell.walls["S"]) \
+                        else "   "
 
                     joint = J_RIGHT if x == width - 1 else J_INNER
                     row_str += wall + joint

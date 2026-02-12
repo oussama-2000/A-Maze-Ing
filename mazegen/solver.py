@@ -1,21 +1,28 @@
 from collections import deque
 from mazegen.coordinates import Coordinates
 from mazegen.ascii_render import AsciiRenderer
+from typing import List, Tuple, Dict, TYPE_CHECKING
+if TYPE_CHECKING:
+    from mazegen.generator import MazeGenerator
 import os
 import time
-from typing import List, Tuple, Dict, Any
 
 
 class Solver:
+
     @staticmethod
-    def solve_bfs(maze: Any, entry: Tuple[int, int],
-                  exit: Tuple[int, int]) -> List[str]:
+    def solve_bfs(
+                  maze: "MazeGenerator",
+                  entry: Tuple[int, int],
+                  exit: Tuple[int, int]
+                  ) -> List:
         start = entry
         goal = exit
 
         queue = deque([start])
-        visited = {start}
-        parent: Dict[Tuple[int, int], Tuple[int, int, str]] = {}
+        visited = set([start])
+        parent = {}
+        # {'reached cell(x, y)' : ('from which cell(x, y), 'wich direction') }
 
         while queue:
             x, y = queue.popleft()
@@ -24,13 +31,14 @@ class Solver:
                 break
 
             cell = maze.get_cell(x, y)
-            if not cell:
-                continue
 
+            # iterating directions to expand neighbors
             for direction, (dx, dy) in Coordinates.directions.items():
-                if cell.walls[direction]:
-                    continue
 
+                if cell and cell.walls[direction]:
+                    continue  # wall is closed
+
+                # compute neighbor coordinates
                 nx, ny = x + dx, y + dy
 
                 if not maze.in_bounds(nx, ny):
@@ -40,14 +48,22 @@ class Solver:
                     visited.add((nx, ny))
                     parent[(nx, ny)] = (x, y, direction)
                     queue.append((nx, ny))
+                    # add it to queue for next exploration
 
-        return Solver.generate_path(maze, parent, entry, exit)
+        return Solver.generate_path(
+                            maze,
+                            parent,
+                            entry,
+                            exit
+                            )
 
     @staticmethod
-    def generate_path(maze: Any, parent: Dict[Tuple[int, int],
-                                              Tuple[int, int, str]],
-                      entry: Tuple[int, int],
-                      exit: Tuple[int, int]) -> List[str]:
+    def generate_path(
+                maze: "MazeGenerator",
+                parent: Dict,
+                entry: Tuple[int, int],
+                exit: Tuple[int, int]
+                ) -> List:
         path = []
         current = exit
 
@@ -60,8 +76,11 @@ class Solver:
         return path
 
     @staticmethod
-    def path_to_cells(maze: Any, entry: Tuple[int, int],
-                      path: List[str]) -> List[Tuple[int, int]]:
+    def path_to_cells(
+                entry: Tuple[int, int],
+                path: List
+                ) -> List:
+
         x, y = entry
         cell_pos = [(x, y)]
 
@@ -73,20 +92,26 @@ class Solver:
         return cell_pos
 
     @staticmethod
-    def show_path(maze: Any, entry: Tuple[int, int], exit: Tuple[int, int],
-                  path: List[Tuple[int, int]], animate: bool = True,
-                  show: bool = True) -> None:
+    def show_path(
+            maze: "MazeGenerator",
+            entry: Tuple[int, int],
+            exit: Tuple[int, int],
+            path: List,
+            animate: bool = True,
+            show: bool = True
+            ) -> None:
+
         renderer = AsciiRenderer(maze, entry, exit)
 
         if animate:
-            visible_path: List[Tuple[int, int]] = []
+            visible_path = set()
 
             for cell in path:
-                visible_path.append(cell)
+                visible_path.add(cell)
                 os.system('cls' if os.name == 'nt' else 'clear')
                 print(renderer.render(path=visible_path, show=show))
                 if show:
                     time.sleep(0.05)
         else:
             os.system('cls' if os.name == 'nt' else 'clear')
-            print(renderer.render(path=list(path), show=show))
+            print(renderer.render(path=set(path), show=show))
