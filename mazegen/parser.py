@@ -31,7 +31,8 @@ class ConfigParser:
         :rtype: Dict | None
         """
 
-        require_keys = ["width", "height", "entry", "exit", "output_file", "perfect"]
+        require_keys = ["width", "height", "entry",
+                        "exit", "output_file", "perfect"]
         keys_count = 0
         try:
             with open(self.filepath, 'r') as file:
@@ -51,7 +52,7 @@ class ConfigParser:
                     if key.strip().upper() not in self.config.keys():
                         raise ValueError(f"Unsuported key :{key}")
                     self.assign_value(key.strip().upper(), value.strip())
-                    if key.lower() in require_keys: 
+                    if key.lower() in require_keys:
                         keys_count += 1
 
             if keys_count != len(require_keys):
