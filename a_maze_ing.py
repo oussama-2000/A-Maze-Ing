@@ -144,7 +144,7 @@ if __name__ == "__main__":
                                 )
                         show = True
                 elif choice == 3:
-
+                    show = True
                     os.system('cls' if os.name == 'nt' else 'clear')
                     renderer = AsciiRenderer(maze=maze, entry=entry, exit=exit)
                     print(renderer.render(rotate_theme=True, theme=theme))
@@ -153,7 +153,7 @@ if __name__ == "__main__":
                         theme = 0
 
                 elif choice == 4:
-
+                    show = True
                     PlayMode.play(
                         maze=maze,
                         entry=entry,
