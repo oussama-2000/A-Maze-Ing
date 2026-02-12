@@ -48,10 +48,18 @@ class AsciiRenderer:
         :return: it returns the maze ascii representation
         :rtype: str
         """
-        colors = [31, 32, 33, 34, 35, 36, 39, 93]
+        colors = [31,  # 0 red
+                  32,  # 1 green
+                  33,  # 2 yellow
+                  34,  # 3 blue
+                  35,  # 4 magenta
+                  36,  # 5 cyan
+                  39,  # 6 default
+                  93   # 7 bright yellow
+                  ]
 
         origin_theme = {
-            'walls': colors[0],
+            'walls': colors[3],
             'inner': colors[1],
             'player': colors[7],
             'entry': colors[6],
@@ -63,10 +71,10 @@ class AsciiRenderer:
         }
 
         theme_1 = {
-            'walls': colors[1],
-            'inner': colors[2],
+            'walls': colors[0],
+            'inner': colors[3],
             'player': colors[4],
-            'entry': colors[7],
+            'entry': colors[3],
             'target': colors[6],
             'path': colors[3],
             'bonuses': colors[5],
@@ -74,8 +82,8 @@ class AsciiRenderer:
             'cells_42': colors[7],
         }
         theme_2 = {
-            'walls': colors[2],
-            'inner': colors[0],
+            'walls': colors[5],
+            'inner': colors[2],
             'player': colors[7],
             'entry': colors[5],
             'target': colors[6],
@@ -96,7 +104,7 @@ class AsciiRenderer:
             'cells_42': colors[6],
         }
         theme_4 = {
-            'walls': colors[1],
+            'walls': colors[4],
             'inner': colors[2],
             'player': colors[2],
             'entry': colors[7],
@@ -104,7 +112,7 @@ class AsciiRenderer:
             'path': colors[3],
             'bonuses': colors[5],
             'visited_cells': colors[7],
-            'cells_42': colors[7],
+            'cells_42': colors[5],
         }
 
         themes = theme_1, theme_2, theme_3, theme_4
