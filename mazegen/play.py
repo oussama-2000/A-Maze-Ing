@@ -68,12 +68,12 @@ class PlayMode:
         :type halwasa: bool
         """
 
-        # os.system('cls' if os.name == 'nt' else 'clear')
-        # intor = "\033[1;31mHury Up Dexter Tonight is The Night !\033[0m"
+        os.system('cls' if os.name == 'nt' else 'clear')
+        intor = "\033[1;31mHury Up Dexter Tonight is The Night !\033[0m"
 
-        # for c in intor:
-        #     print(c, end="", flush=True)
-        #     time.sleep(.1)
+        for c in intor:
+            print(c, end="", flush=True)
+            time.sleep(.1)
 
         time.sleep(1)
         renderer = AsciiRenderer(maze, entry=entry, exit=exit)
