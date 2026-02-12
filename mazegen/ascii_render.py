@@ -56,7 +56,7 @@ class AsciiRenderer:
             'player': colors[7],
             'entry': colors[6],
             'target': colors[3],
-            'path': colors[4],
+            'path': colors[2],
             'bonuses': colors[5],
             'visited_cells': colors[2],
             'cells_42': colors[6],
