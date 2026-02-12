@@ -1,13 +1,17 @@
 class Cell:
-    """Represents a single square (node) in the maze grid."""
+    """
+        Represents a single square in the maze grid.
+        hase attributes:
+            walls: dictionary of the 4 walls state
+            visited = if the cell was visited or not
+            blocked if the cell is owned by 42 block
+    """
     def __init__(self) -> None:
-        # Dictionary tracking if a wall exists in each direction
-        # True means the wall is solid; False means it has been carved (pathway)
         self.walls = {
             "N": True,
             "E": True,
             "S": True,
             "W": True
         }
-        # Used by the generation algorithm to ensure we don't visit the same room twice
         self.visited = False
+        self.blocked = False  # owned by 42

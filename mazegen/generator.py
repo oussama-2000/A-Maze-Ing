@@ -1,39 +1,52 @@
 import random
 import time
 import os
-from cell import Cell
-from coordinates import directions
-from coordinates import opposite
-from collections import deque
-from parser import ConfigParser
-from ascii_render import AsciiRenderer
-from encoder import HexEncoder
+from mazegen.cell import Cell
+from mazegen.coordinates import Coordinates
+from mazegen.ascii_render import AsciiRenderer
+from typing import List, Optional, Tuple
 
 
 class MazeGenerator:
-    def __init__(self, width: int,
-                 height: int,) -> None:
+    """
+        Instantiation :
+            instance_name = MazeGenerator(width, height)
+            for example:
+                maze = MazeGenerator(15, 17)
+        Access :
+            To access a maze solution you can do:
+                solution_path = Solver.solve_bfs(instance_name, entry, exit)
+
+    """
+    def __init__(self, width: int, height: int,
+                 seed: Optional[int] = None) -> None:
+
         self.width = width
         self.height = height
-        self.grid = self.create_grid()
+        self.grid: List[List[Cell]] = self.create_grid()
+        self.bonuses: List = []
+        if seed is not None:
+            self.seed = seed
+        else:
+            self.seed = random.randint(0, 10**6)
 
     def create_grid(self) -> list:
         """creates the maze grid (x, y)"""
         grid = []
-        for y in range(self.height):
+        for _ in range(self.height):
             row = []
-            for x in range(self.width):
+            for _ in range(self.width):
                 row.append(Cell())
             grid.append(row)
         return grid
 
     def in_bounds(self, x: int, y: int) -> bool:
         """
-        Security check to ensure coordinates are within the grid boundaries.
+        Security check to ensure coordinates are within the grid.
         """
         return 0 <= x < self.width and 0 <= y < self.height
 
-    def get_cell(self, x: int, y: int):
+    def get_cell(self, x: int, y: int) -> Optional[Cell]:
         """
         Retrieves the Cell object at the given (x, y) coordinates.
         """
@@ -41,69 +54,99 @@ class MazeGenerator:
             return None
         return self.grid[y][x]
 
-    def carve_passage(self, x1, y1, x2, y2, direction) -> None:
-        """
-        x1, y1: Coordinates of the current cell.
-        x2, y2: Coordinates of the neighbor cell.
-        """
+    def carve(self, x1: int, y1: int,
+              x2: int, y2: int, direction: str
+              ) -> None:
+
         current = self.get_cell(x1, y1)
         neighbor = self.get_cell(x2, y2)
 
-        # Only proceed if both coordinates actually point to valid cells
         if current and neighbor:
-            # Knock down the wall on the current cell's side
             current.walls[direction] = False
 
-            # Identify the matching wall on the neighbor's side using the 'opposite' helper
-            opp = opposite[direction]
+            opp = Coordinates.opposite[direction]
             neighbor.walls[opp] = False
 
-    def generate(self, start_x=0, start_y=0, animate=False, entry=None, exit=None):
-        if entry is None:
-            stack = [(start_x, start_y)]
-            cell = self.get_cell(start_x, start_y)
-            if cell:
-                cell.visited = True
-        else:
-            stack = [entry]
-        if exit is None:
-            exit = (self.width - 1, self.height - 1)
+    def generate_DFS(self,
+                     entry: Tuple[int, int],
+                     exit: Tuple[int, int],
+                     animate: bool = False,
+                     perfect_flag: bool = False
+                     ) -> None:
+
+        random.seed(self.seed)
+        # when the 42 block should shows up
+        if self.width >= 9 and self.height >= 7:
+            blocked_positions = \
+                Coordinates.forty_two_cells(self.width, self.height)
+            for bx, by in blocked_positions:
+                blocked_cell = self.get_cell(bx, by)
+                if blocked_cell:
+                    blocked_cell.blocked = True
+
+        px, py = entry
+        stack = [(px, py)]
+
+        cell = self.get_cell(px, py)
+        if cell:
+            cell.visited = True
+
         renderer = AsciiRenderer(self, entry=entry, exit=exit)
 
-        if animate:
-            print(renderer.render())
-            time.sleep(2)
         while stack:
             if animate:
                 os.system('cls' if os.name == 'nt' else 'clear')
                 print(renderer.render(player_pos=stack[-1]))
                 time.sleep(0.01)
+
             x, y = stack[-1]
             unvisited_neighbors = []
-            for direction, (dx, dy) in directions.items():
+
+            for direction, (dx, dy) in Coordinates.directions.items():
                 nx, ny = x + dx, y + dy
                 if self.in_bounds(nx, ny):
                     neighbor = self.get_cell(nx, ny)
-                    if neighbor and neighbor.visited is False:
+                    if neighbor and not neighbor.visited and\
+                            not neighbor.blocked:
                         unvisited_neighbors.append((direction, nx, ny))
+
             if unvisited_neighbors:
                 val = random.choice(unvisited_neighbors)
                 chosen_dir, next_x, next_y = val
-                self.carve_passage(x, y, next_x, next_y, chosen_dir)
+                self.carve(x, y, next_x, next_y, chosen_dir)
 
                 if animate:
                     os.system('cls' if os.name == 'nt' else 'clear')
                     print(renderer.render(player_pos=(next_x, next_y)))
-                    time.sleep(0.02)
+                    time.sleep(0.01)
 
                 neighbor_cell = self.get_cell(next_x, next_y)
-                neighbor_cell.visited = True
+                if neighbor_cell:
+                    neighbor_cell.visited = True
                 stack.append((next_x, next_y))
             else:
                 stack.pop()
+
+        if not perfect_flag:
+            extra_walls_to_break = int((self.width * self.height) / 10)
+            for _ in range(extra_walls_to_break):
+                rx, ry = random.randint(0, self.width-1), \
+                    random.randint(0, self.height-1)
+                random_dir = random.choice(list(Coordinates.directions.keys()))
+                dx, dy = Coordinates.directions[random_dir]
+                nx, ny = rx + dx, ry + dy
+                # to make sure if it's owned by 42 block
+                curent_cell = self.get_cell(rx, ry)
+                next_cell = self.get_cell(nx, ny)
+                if curent_cell and next_cell:
+                    if self.in_bounds(nx, ny) and not curent_cell.blocked and\
+                            not next_cell.blocked:
+                        self.carve(rx, ry, nx, ny, random_dir)
+
         if not animate:
             os.system('cls' if os.name == 'nt' else 'clear')
             print(renderer.render())
+<<<<<<< HEAD
 
     def place_bonuses(self, count=3, entry=(0, 0), exit=(0, 0)):
         self.bonuses = []
@@ -292,3 +335,5 @@ if data:
     elif choice == 5:
         os.system('cls' if os.name == 'nt' else 'clear')
         print("Exiting The Game !")
+=======
+>>>>>>> amkhou
