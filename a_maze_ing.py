@@ -27,9 +27,10 @@ if __name__ == "__main__":
             perfect = data['PERFECT']
             animate = data['ANIMATE']
             output_file = data['OUTPUT_FILE']
+            seed = data['SEED']
             halwasa_mode = data['HALWASA']
 
-            maze = MazeGenerator(width, height)
+            maze = MazeGenerator(width, height, seed)
             maze.generate_DFS(
                 animate=animate,
                 entry=entry,
@@ -69,6 +70,15 @@ if __name__ == "__main__":
                                             path=directions_path
                                             )
 
+                # Color codes
+                RED: str = "\033[31m"
+                BOLD: str = "\033[1m"
+                RESET: str = "\033[0m"
+                GREEN: str = "\033[32m"
+
+                print(f"{BOLD}{RED}Maze Seed : "
+                      f"{maze.seed}{RESET} \n")
+                # print("="*10, "A-Maze-Ing", "="*10)
                 print(" █████╗       ███╗   ███╗ █████╗"
                       " ███████╗███████╗      ██╗███╗  ██╗ ██████╗ ")
                 print("██╔══██╗      ████╗ ████║██╔══██╗"
@@ -91,14 +101,14 @@ if __name__ == "__main__":
                 }
 
                 for key, option in options.items():
-                    print(f"|                    {key}. {option}"
-                          "                    |")
-                print("|                                        "
-                      "                                    |")
-                print("-"*78)
+                    print(f"{BOLD}{GREEN}|                    {key}. {option}"
+                          f"                    {BOLD}{GREEN}|")
+                print(f"{BOLD}{GREEN}|                                        "
+                      f"                                    |{RESET}")
+                print(f"{BOLD}{GREEN}{'-' * 78}{RESET}")
 
                 try:
-                    choice = int(input("Choice: "))
+                    choice = int(input(f"{BOLD}Choice: {RESET}"))
 
                     if choice not in options.keys():
                         raise ValueError
@@ -107,7 +117,7 @@ if __name__ == "__main__":
                 if choice == 1:
                     show = True
                     os.system('cls' if os.name == 'nt' else 'clear')
-                    maze = MazeGenerator(width, height)
+                    maze = MazeGenerator(width, height, seed)
                     maze.generate_DFS(
                             animate=animate,
                             entry=entry,

@@ -19,6 +19,7 @@ class ConfigParser:
             "OUTPUT_FILE": "output_maze.txt",
             "PERFECT": False,
             "ANIMATE": False,
+            "SEED": None,
             "HALWASA": False
         }
 
@@ -30,6 +31,7 @@ class ConfigParser:
         :rtype: Dict | None
         """
 
+        require_keys = ["width", "height", "entry", "exit", "output_file", "perfect"]
         keys_count = 0
         try:
             with open(self.filepath, 'r') as file:
@@ -46,12 +48,13 @@ class ConfigParser:
                     if '=' not in line:
                         raise ValueError("use # to make comments "
                                          f"in {self.filepath}")
-                    if key.strip() not in self.config.keys():
+                    if key.strip().upper() not in self.config.keys():
                         raise ValueError(f"Unsuported key :{key}")
                     self.assign_value(key.strip().upper(), value.strip())
-                    keys_count += 1
+                    if key.lower() in require_keys: 
+                        keys_count += 1
 
-            if keys_count != len(self.config.keys()):
+            if keys_count != len(require_keys):
                 raise ValueError("Make Sure Youe Entered The Require Entries")
 
             if self.validate():
@@ -83,13 +86,30 @@ class ConfigParser:
                 coords = tuple(map(int, value.split(',')))
                 self.config[key] = coords
             elif key == "PERFECT":
-                self.config[key] = value.lower() == 'true'
+                if value.lower() == 'true':
+                    self.config[key] = True
+                elif value.lower() == 'false':
+                    self.config[key] = False
+                else:
+                    self.config[key] = None
             elif key == "OUTPUT_FILE":
                 self.config[key] = value
             elif key == "ANIMATE":
-                self.config[key] = value.lower() == 'true'
+                if value.lower() == 'true':
+                    self.config[key] = True
+                elif value.lower() == 'false':
+                    self.config[key] = False
+                else:
+                    self.config[key] = None
+            elif key == "SEED":
+                self.config["SEED"] = int(value)
             elif key == "HALWASA":
-                self.config[key] = value.lower() == 'true'
+                if value.lower() == 'true':
+                    self.config[key] = True
+                elif value.lower() == 'false':
+                    self.config[key] = False
+                else:
+                    self.config[key] = None
         except Exception:
             raise ValueError(f"Could Not Parse '{value} for key '{key}")
 
@@ -105,8 +125,9 @@ class ConfigParser:
 
         if w <= 0 or h <= 0:
             raise ValueError("Width And Height Must Be Positive .")
-        if w < 3 or h < 3:
-            raise ValueError("Give Reasonable height and width to make a maze")
+        if w < 9 or h < 7:
+            raise ValueError("Give Reasonable height and width to make a maze "
+                             "with the 42 block")
 
         if self.config["ENTRY"] == self.config["EXIT"]:
             raise ValueError("Entry and Exit must be different")
@@ -133,5 +154,19 @@ class ConfigParser:
         if (exit_x < 0) or (exit_x >= w) or (exit_y < 0) or (exit_y >= h):
             raise ValueError(f"Exit {exit_x},{exit_y}"
                              f" is outside The {w}x{h} grid !")
+
+        if self.config["PERFECT"] is None:
+            raise ValueError("PERFECT value must be in boolen "
+                             "(True or False) !")
+        if self.config["ANIMATE"] is None:
+            raise ValueError("ANIMATE value must be in boolen "
+                             "(True or False) !")
+        if self.config["HALWASA"] is None:
+            raise ValueError("HALWASA value must be in boolen "
+                             "(True or False) !")
+
+        if self.config["OUTPUT_FILE"] is None or\
+                len(self.config["OUTPUT_FILE"]) < 1:
+            raise ValueError("You must provide a output file")
 
         return True

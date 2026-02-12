@@ -115,6 +115,10 @@ class PlayMode:
 
             if (px, py) == (goal_x, goal_y):
                 print("\033[92m Youe did good, Find a place! \033[0m")
+                time.sleep(1.8)
+                os.system('cls' if os.name == 'nt' else 'clear')
+                maze.bonuses = []  # to remove bounuses
+                print(renderer.render(rotate_theme=True, theme=theme))
                 break
 
             move = input("Move: ").lower()
