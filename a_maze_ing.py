@@ -79,7 +79,7 @@ if __name__ == "__main__":
                 BOLD: str = "\033[1m"
                 RESET: str = "\033[0m"
 
-                print(f"{BOLD}{RED}Maze Seed : "
+                print(f"{BOLD}{MAGENTA}Maze Seed : "
                       f"{maze.seed}{RESET} \n")
                 # print("="*10, "A-Maze-Ing", "="*10)
                 print(f"{CYAN} █████╗       ███╗   ███╗ █████╗"

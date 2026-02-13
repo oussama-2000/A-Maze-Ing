@@ -67,7 +67,7 @@ class AsciiRenderer:
             'path': colors[2],
             'bonuses': colors[5],
             'visited_cells': colors[2],
-            'cells_42': colors[6],
+            'cells_42': colors[4],
         }
 
         theme_1 = {
