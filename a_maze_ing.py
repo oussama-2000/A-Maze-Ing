@@ -28,7 +28,7 @@ if __name__ == "__main__":
             animate = data['ANIMATE']
             output_file = data['OUTPUT_FILE']
             seed = data['SEED']
-            halwasa_mode = data['HALWASA']
+            hallucination_mode = data['HALLUCINATION']
 
             maze = MazeGenerator(width, height, seed)
             maze.generate_DFS(
@@ -161,7 +161,7 @@ if __name__ == "__main__":
                         maze=maze,
                         entry=entry,
                         exit=exit,
-                        halwasa=halwasa_mode
+                        hallucination=hallucination_mode
                         )
 
                 elif choice == 5:

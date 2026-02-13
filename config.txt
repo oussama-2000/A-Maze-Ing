@@ -5,7 +5,7 @@ ENTRY=0,1
 EXIT=14,14
 OUTPUT_FILE=output_maze.txt
 PERFECT=false
-ANIMATE=false
 
-SEED=-1
-HALWASA=true
+ANIMATE=false
+SEED=42
+HALLUCINATION=true

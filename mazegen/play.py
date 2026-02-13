@@ -43,7 +43,7 @@ class PlayMode:
     def play(maze: "MazeGenerator",
              entry: Tuple[int, int],
              exit: Tuple[int, int],
-             halwasa: bool = False
+             hallucination: bool = False
              ) -> None:
         """
         Docstring for play
@@ -104,7 +104,7 @@ class PlayMode:
                   "\033[1;31m2 - Don't Leave Evidance Behind You\033[0m")
             print("to exit the play mode enter : exit \n\n")
 
-            if halwasa:
+            if hallucination:
                 theme = random.randint(0, 3)
 
             print(renderer.render(

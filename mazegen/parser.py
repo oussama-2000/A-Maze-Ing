@@ -20,7 +20,7 @@ class ConfigParser:
             "PERFECT": False,
             "ANIMATE": False,
             "SEED": None,
-            "HALWASA": False
+            "HALLUCINATION": False
         }
 
     def parse(self) -> Optional[Dict]:
@@ -104,7 +104,7 @@ class ConfigParser:
                     self.config[key] = None
             elif key == "SEED":
                 self.config["SEED"] = int(value)
-            elif key == "HALWASA":
+            elif key == "HALLUCINATION":
                 if value.lower() == 'true':
                     self.config[key] = True
                 elif value.lower() == 'false':
@@ -162,8 +162,8 @@ class ConfigParser:
         if self.config["ANIMATE"] is None:
             raise ValueError("ANIMATE value must be in boolen "
                              "(True or False) !")
-        if self.config["HALWASA"] is None:
-            raise ValueError("HALWASA value must be in boolen "
+        if self.config["HALLUCINATION"] is None:
+            raise ValueError("hallucination mode value must be in boolen "
                              "(True or False) !")
 
         if self.config["OUTPUT_FILE"] is None or\
