@@ -319,4 +319,3 @@
   <li>pip / build</li>
   <ul><li>Packaging and distribution</li></ul>
 </ul>
-<img src="image.png">
