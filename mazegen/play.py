@@ -154,6 +154,8 @@ class PlayMode:
                                                         maze.height
                                                         ):
                             raise ValueError
+                        if not maze.in_bounds(tx, ty):
+                            raise ValueError
                         else:
                             px = tx
                             py = ty
