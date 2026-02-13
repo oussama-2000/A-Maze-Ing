@@ -133,6 +133,13 @@ class ConfigParser:
         if self.config["ENTRY"] == self.config["EXIT"]:
             raise ValueError("Entry and Exit must be different")
 
+        try:
+            entry_x, entry_y = self.config["ENTRY"]
+            exit_x, exit_y = self.config["EXIT"]
+        except ValueError:
+            raise ValueError("Entry and Exit Coordinates Should be Exactly"
+                             " two dimentions")
+
         if w >= 9 and h >= 7:
             if self.config["ENTRY"] in Coordinates.forty_two_cells(w, h):
                 raise ValueError("Entry Coordinates Should not located in"
@@ -141,12 +148,6 @@ class ConfigParser:
             if self.config["EXIT"] in Coordinates.forty_two_cells(w, h):
                 raise ValueError("Exit Coordinates Should not located in"
                                  " the 42 block")
-        try:
-            entry_x, entry_y = self.config["ENTRY"]
-            exit_x, exit_y = self.config["EXIT"]
-        except ValueError:
-            raise ValueError("Entry and Exit Coordinates Should be Exactly"
-                             " two dimentions")
 
         if (entry_x < 0) or (entry_x >= w) or (entry_y < 0) or (entry_y >= h):
             raise ValueError(f"Entry {entry_x},{entry_y} "
@@ -157,13 +158,13 @@ class ConfigParser:
                              f" is outside The {w}x{h} grid !")
 
         if self.config["PERFECT"] is None:
-            raise ValueError("PERFECT value must be in boolen "
+            raise ValueError("PERFECT value must be in boolean "
                              "(True or False) !")
         if self.config["ANIMATE"] is None:
-            raise ValueError("ANIMATE value must be in boolen "
+            raise ValueError("ANIMATE value must be in boolean "
                              "(True or False) !")
         if self.config["HALLUCINATION"] is None:
-            raise ValueError("hallucination mode value must be in boolen "
+            raise ValueError("hallucination mode value must be in boolean "
                              "(True or False) !")
 
         if self.config["OUTPUT_FILE"] is None or\

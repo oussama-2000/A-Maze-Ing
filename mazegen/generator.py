@@ -15,7 +15,7 @@ class MazeGenerator:
                 maze = MazeGenerator(15, 17)
         Access :
             To access a maze solution you can do:
-                solution_path = Solver.solve_bfs(instance_name, entry, exit)
+                grid = maze.grid()
 
     """
     def __init__(self, width: int, height: int,
@@ -57,7 +57,9 @@ class MazeGenerator:
     def carve(self, x1: int, y1: int,
               x2: int, y2: int, direction: str
               ) -> None:
-
+        """
+        carve current cell wall and the neighbor cell oposit wall
+        """
         current = self.get_cell(x1, y1)
         neighbor = self.get_cell(x2, y2)
 
@@ -73,7 +75,9 @@ class MazeGenerator:
                      animate: bool = False,
                      perfect_flag: bool = False
                      ) -> None:
-
+        """
+        DFS generation algorithm to carve the maze
+        """
         random.seed(str(self.seed))
         # when the 42 block should shows up
         if self.width >= 9 and self.height >= 7:

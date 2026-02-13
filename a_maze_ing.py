@@ -13,7 +13,7 @@ if __name__ == "__main__":
         if len(argv) < 2:
             raise ValueError("Error: You Sould Provide The Config File")
         if len(argv) > 2:
-            raise ValueError("Error: No More Arguments More Than Program "
+            raise ValueError("Error: No More Arguments More Than Program name"
                              "and Config file")
         config_file = argv[1]
         configration = ConfigParser(config_file)

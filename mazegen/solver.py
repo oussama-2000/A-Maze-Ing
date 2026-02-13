@@ -1,4 +1,3 @@
-from collections import deque
 from mazegen.coordinates import Coordinates
 from mazegen.ascii_render import AsciiRenderer
 from typing import List, Tuple, Dict, TYPE_CHECKING
@@ -36,13 +35,13 @@ class Solver:
         start = entry
         goal = exit
 
-        queue = deque([start])
+        queue = [start]
         visited = set([start])
         parent = {}
         # {'reached cell(x, y)' : ('from which cell(x, y), 'wich direction') }
 
         while queue:
-            x, y = queue.popleft()
+            x, y = queue.pop(0)
 
             if (x, y) == goal:
                 break
@@ -55,7 +54,6 @@ class Solver:
                 if cell and cell.walls[direction]:
                     continue  # wall is closed
 
-                # compute neighbor coordinates
                 nx, ny = x + dx, y + dy
 
                 if not maze.in_bounds(nx, ny):
