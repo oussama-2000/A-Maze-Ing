@@ -124,8 +124,6 @@ class ConfigParser:
         w = self.config["WIDTH"]
         h = self.config["HEIGHT"]
 
-        if w <= 0 or h <= 0:
-            raise ValueError("Width And Height Must Be Positive .")
         if w < 9 or h < 7:
             raise ValueError("Give Reasonable height and width to make a maze "
                              "with the 42 block")
@@ -170,5 +168,9 @@ class ConfigParser:
         if self.config["OUTPUT_FILE"] is None or\
                 len(self.config["OUTPUT_FILE"]) < 1:
             raise ValueError("You must provide a output file")
+
+        if self.config["OUTPUT_FILE"] == '.' or\
+                self.config["OUTPUT_FILE"] == '..':
+            raise ValueError("You Entered a Directory instead of file !")
 
         return True

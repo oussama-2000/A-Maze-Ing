@@ -35,20 +35,18 @@ class Solver:
         start = entry
         goal = exit
 
-        queue = [start]
+        cells_to_explore = [start]
         visited = set([start])
         parent = {}
-        # {'reached cell(x, y)' : ('from which cell(x, y), 'wich direction') }
 
-        while queue:
-            x, y = queue.pop(0)
+        while cells_to_explore:
+            x, y = cells_to_explore.pop(0)
 
             if (x, y) == goal:
                 break
 
             cell = maze.get_cell(x, y)
 
-            # iterating directions to expand neighbors
             for direction, (dx, dy) in Coordinates.directions.items():
 
                 if cell and cell.walls[direction]:
@@ -62,8 +60,7 @@ class Solver:
                 if (nx, ny) not in visited:
                     visited.add((nx, ny))
                     parent[(nx, ny)] = (x, y, direction)
-                    queue.append((nx, ny))
-                    # add it to queue for next exploration
+                    cells_to_explore.append((nx, ny))
 
         return Solver.generate_path(
                             parent,
