@@ -97,6 +97,16 @@ class MazeGenerator:
 
         renderer = AsciiRenderer(self, entry=entry, exit=exit)
 
+        # For The First Animation
+        os.system('cls' if os.name == 'nt' else 'clear')
+        intor = "\033[1;36mA-MAZE-ING\nDirected By Amkhou And" \
+            " Taoussi !\033[0m"
+
+        for c in intor:
+            print(c, end="", flush=True)
+            time.sleep(.1)
+        time.sleep(0.5)
+
         while stack:
             if animate:
                 os.system('cls' if os.name == 'nt' else 'clear')
