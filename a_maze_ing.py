@@ -62,9 +62,13 @@ if __name__ == "__main__":
                             )
                 output = encoder.encode()
 
-                with open(output_file, "w") as file:
-                    file.write(output)
-
+                try:
+                    with open(output_file, "w") as file:
+                        file.write(output)
+                except PermissionError:
+                    os.system(f"rm -rf {output_file}")
+                    with open(output_file, "w") as file:
+                        file.write(output)
                 coordinates_path = Solver.path_to_cells(
                                             entry=entry,
                                             path=directions_path
