@@ -71,17 +71,15 @@ if __name__ == "__main__":
                                             )
 
                 # Color codes
-                RED: str = "\033[31m"
-                GREEN: str = "\033[32m"
-                YELLOW: str = "\033[33m"
-                MAGENTA: str = "\033[35m"
-                CYAN: str = "\033[36m"
-                BOLD: str = "\033[1m"
-                RESET: str = "\033[0m"
+                GREEN = "\033[32m"
+                MAGENTA = "\033[35m"
+                CYAN = "\033[36m"
+                BOLD = "\033[1m"
+                RESET = "\033[0m"
 
                 print(f"{BOLD}{MAGENTA}Maze Seed : "
                       f"{maze.seed}{RESET} \n")
-                # print("="*10, "A-Maze-Ing", "="*10)
+
                 print(f"{CYAN} █████╗       ███╗   ███╗ █████╗"
                       " ███████╗███████╗      ██╗███╗  ██╗ ██████╗ ")
                 print("██╔══██╗      ████╗ ████║██╔══██╗"

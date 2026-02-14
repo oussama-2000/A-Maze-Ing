@@ -50,7 +50,7 @@ class Solver:
             for direction, (dx, dy) in Coordinates.directions.items():
 
                 if cell and cell.walls[direction]:
-                    continue  # wall is closed
+                    continue
 
                 nx, ny = x + dx, y + dy
 
