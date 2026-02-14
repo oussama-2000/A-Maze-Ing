@@ -3,8 +3,8 @@ HEIGHT=15
 ENTRY=0,1
 EXIT=17, 14
 OUTPUT_FILE=output_maze.txt
-PERFECT=false
+PERFECT=True
 # optional
 ANIMATE=false
 # SEED=15
-HALLUCINATIOn=true
+HALLUCINATIOn=false
