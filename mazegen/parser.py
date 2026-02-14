@@ -170,7 +170,10 @@ class ConfigParser:
             raise ValueError("You must provide a output file")
 
         if self.config["OUTPUT_FILE"] == '.' or\
-                self.config["OUTPUT_FILE"] == '..':
+                self.config["OUTPUT_FILE"] == '..' or\
+                self.config["OUTPUT_FILE"] == './' or\
+                self.config["OUTPUT_FILE"] == '../' or\
+                self.config["OUTPUT_FILE"] == '/':
             raise ValueError("You Entered a Directory instead of file !")
 
         return True
