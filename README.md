@@ -1,4 +1,4 @@
-<i>This project has been created as part of the 42 curriculum by oamkhou outaouss</i>
+<i>This project has been created as part of the 42 curriculum by ooussama amkhou oussama taoussi</i>
 <h1>Description</h1>
 <ul>
   <strong>A-Maze-ing</strong> is a python project that generates and displays mazes using maze generation algorithms <br>
