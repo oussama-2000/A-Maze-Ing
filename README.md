@@ -1,3 +1,5 @@
+<img src="maze.png" />
+<br/>
 <i>This project has been created as part of the 42 curriculum by ooussama amkhou oussama taoussi</i>
 <h1>Description</h1>
 <ul>
