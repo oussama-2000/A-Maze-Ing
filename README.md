@@ -302,7 +302,7 @@
 <h3>What Could Be Improved</h3>
 <ul>
   <li>Maze visualization is currently limited to ASCII terminal rendering.</li>
-  <li>A graphical interface (e.g., Tkinter, Pygame, or web visualization) would improve clarity.</li>
+  <li>A graphical interface would improve clarity.</li>
 </ul>
 <h3>Tools Used</h3>
 <ul>
